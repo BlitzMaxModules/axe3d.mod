@@ -1,14 +1,7 @@
 
 Strict
 
-Rem
-bbdoc: Geom
-End Rem
-Module max3d.geom
-
-ModuleInfo "Version: 1.01"
-ModuleInfo "Author: Mark Sibly"
-ModuleInfo "License: BSD License"
+' "Author: Mark Sibly"
 
 Import BRL.Math
 Import BRL.Data

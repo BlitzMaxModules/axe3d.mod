@@ -14,7 +14,7 @@ ModuleInfo "CC_OPTS:-fexceptions"
 
 Import "assimp/code/irrXML/*.h"
 Import "assimp/code/*.h"
-
+Import "assimp/code/irrXML/irrXML.cpp"
 Import "assimp/code/3DSConverter.cpp"
 Import "assimp/code/3DSLoader.cpp"
 Import "assimp/code/ACLoader.cpp"
