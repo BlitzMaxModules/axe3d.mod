@@ -2,9 +2,9 @@
 Strict
 
 Rem
-bbdoc: Max3D
+bbdoc: ASSIMP!
 End Rem
-Module max3d.assimp
+Module axe3d.assimp
 
 ModuleInfo "Version: 0.01"
 ModuleInfo "Author: Copyright (c) 2006-2008, ASSIMP Development Team"
