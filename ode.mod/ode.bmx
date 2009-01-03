@@ -4,7 +4,7 @@ Strict
 Rem
 bbdoc: Open Dynamics Engine
 end rem
-Module Max3D.ODE
+Module axe3d.ode
 
 ModuleInfo "Version: 1.01"
 ModuleInfo "Author: Russell Smith, Pierre Terdiman"

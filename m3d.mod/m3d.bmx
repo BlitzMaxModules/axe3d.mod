@@ -10,25 +10,21 @@ ModuleInfo "Version: 0.01"
 ModuleInfo "Author: Mark Sibly"
 ModuleInfo "License: BSD License"
 
-Import max3d.ode
+Import axe3d.ode
+Import axe3d.assimp
+
 Import "m3dexterns.bmx"
 
-Incbin "blur.glsl"
-Incbin "clear.glsl"
-Incbin "distantlight.glsl"
-Incbin "material.glsl"
-Incbin "mesh.direct.glsl"
-Incbin "mesh.glsl"
-Incbin "mirror.glsl"
-Incbin "model.glsl"
-Incbin "pointlight.glsl"
-Incbin "quad.glsl"
-Incbin "shadowmap.glsl"
-Incbin "spotlight.glsl"
-Incbin "sprite.direct.glsl"
-Incbin "sprite.glsl"
-Incbin "terrain.glsl"
-Incbin "tonemap.glsl"
+Incbin "max3d/clear.glsl"
+Incbin "max3d/distantlight.glsl"
+Incbin "max3d/mirror.glsl"
+Incbin "max3d/model.glsl"
+Incbin "max3d/pointlight.glsl"
+Incbin "max3d/quad.glsl"
+Incbin "max3d/shadowmap.glsl"
+Incbin "max3d/spotlight.glsl"
+Incbin "max3d/sprite.glsl"
+Incbin "max3d/terrain.glsl"
 
 Const FORMAT_A8=1
 Const FORMAT_I8=2
