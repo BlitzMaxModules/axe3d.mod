@@ -4,7 +4,7 @@ Strict
 Rem
 bbdoc: Max3D
 End Rem
-Module max3d.m3d
+Module axe3d.m3d
 
 ModuleInfo "Version: 0.01"
 ModuleInfo "Author: Mark Sibly"

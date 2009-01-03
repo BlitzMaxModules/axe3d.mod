@@ -20,7 +20,8 @@ Import BRL.GLGraphics
 
 Import "max3d/*.h"
 Import "../ode.mod/opende/include/*.h"
-Import "max3d/GLee.c"
+
+'Import "max3d/GLee.c"
 
 Import "max3d/actor.cpp"
 Import "max3d/animator.cpp"
