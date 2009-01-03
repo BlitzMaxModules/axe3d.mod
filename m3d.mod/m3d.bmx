@@ -15,8 +15,6 @@ Import axe3d.assimp
 
 Import "m3dexterns.bmx"
 
-Import "geom.bmx"
-
 Incbin "max3d/clear.glsl"
 Incbin "max3d/distantlight.glsl"
 Incbin "max3d/mirror.glsl"
