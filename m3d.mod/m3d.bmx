@@ -15,16 +15,16 @@ Import axe3d.assimp
 
 Import "m3dexterns.bmx"
 
-Incbin "max3d/clear.glsl"
-Incbin "max3d/distantlight.glsl"
-Incbin "max3d/mirror.glsl"
-Incbin "max3d/model.glsl"
-Incbin "max3d/pointlight.glsl"
-Incbin "max3d/quad.glsl"
-Incbin "max3d/shadowmap.glsl"
-Incbin "max3d/spotlight.glsl"
-Incbin "max3d/sprite.glsl"
-Incbin "max3d/terrain.glsl"
+Incbin "clear.glsl"
+Incbin "distantlight.glsl"
+Incbin "mirror.glsl"
+Incbin "model.glsl"
+Incbin "pointlight.glsl"
+Incbin "quad.glsl"
+Incbin "shadowmap.glsl"
+Incbin "spotlight.glsl"
+Incbin "sprite.glsl"
+Incbin "terrain.glsl"
 
 Const FORMAT_A8=1
 Const FORMAT_I8=2
@@ -75,7 +75,7 @@ Function Max3dGraphics( w=0,h=0,d=0,r=60 )
 	If w>0
 		GLGraphics w,h,d,r,GRAPHICS_BACKBUFFER
 	EndIf
-	InitMax3D Importer
+	InitMax3D m3dImporter
 
 End Function
 
@@ -84,15 +84,22 @@ bbdoc: LoadShader
 End Rem
 Function LoadShader( path$ )
 	Local source$
+	If source=""
+		source=LoadString( path )
+	EndIf
+	If source=""
+		Local name$=""+path+".glsl"
+		source=String.FromBytes( IncbinPtr( name ),IncbinLen( name ) )
+	EndIf
+Rem
 	If path.StartsWith( "<" ) And path.EndsWith( ">" )
 		Local name$=path[1..path.length-1]'+".glsl"
 		source=String.FromBytes( IncbinPtr( name ),IncbinLen( name ) )
 	Else
 		source=LoadString( path )
 	EndIf
-	
-	DebugLog "source:"+source.length
-	
+	DebugLog "source:"+path+"("+source.length+" bytes)"
+EndRem	
 	Return CreateShader( source )
 End Function	
 
@@ -106,7 +113,7 @@ Function LoadTexture( path$ )
 	If Not t t=LoadPixmap( "../samples/"+StripDir(path) )
 	If Not t t=LoadPixmap( "../media/"+StripDir(path) )
 	If Not t Return 0
-	Local fmt=PixelFormat( t )
+	Local fmt=m3dPixelFormat( t )
 	Local tex=CreateTexture( t.width,t.height,fmt,flags )
 	If Not tex Return 0
 	SetTexturePath tex,path
@@ -123,7 +130,10 @@ Function LoadCubeTexture( path$ )
 	Local t:TPixmap=LoadPixmap( path )
 	If Not t t=LoadPixmap( "../samples/"+StripDir(path) )
 	If Not t t=LoadPixmap( "../media/"+StripDir(path) )
-	If Not t Return 0
+	If Not t 
+		DebugStop
+		Return 0
+	EndIf
 	Local size=t.width
 	If size=t.height
 		Local p:TPixmap=TPixmap.Create( size,size*6,t.format )
@@ -134,7 +144,7 @@ Function LoadCubeTexture( path$ )
 	Else If t.height<>size*6
 		Return
 	EndIf
-	Local fmt=PixelFormat( t )
+	Local fmt=m3dPixelFormat( t )
 	Local tex=CreateCubeTexture( size,fmt,flags )
 	If Not tex Return 0
 	SetTexturePath tex,path
@@ -172,20 +182,41 @@ End Function
 
 Private
 
-Function Importer( classz:Byte Ptr,pathz:Byte Ptr )
+Global Max3dImportDirs$[]=["media"]		'./{DEVDIR}/max3d"]
+
+Function m3dImporter( classz:Byte Ptr,pathz:Byte Ptr )
 	Local class$=String.FromCString( classz )
 	Local path$=String.FromCString( pathz )
+Rem	
+	If FileType( path )=FILETYPE_NONE
+		Local file$=StripDir( path ),tpath$
+		For Local dir$=EachIn Max3dImportDirs
+			tpath=dir+"/"+file
+			If FileType( tpath )=FILETYPE_FILE Exit
+			tpath=""
+		Next
+		If Not tpath
+			DebugStop
+			Print "Max3d Error: Unable to locate object of type '"+class+"' at:"+path
+			Return
+		EndIf
+		path=tpath
+	EndIf
+EndRem	
 	Select class
 	Case "CShader"
-		Return LoadShader( "<"+path+">" )
+		Return LoadShader( path )
 	Case "CTexture"
 		Return LoadTexture( path )
+	Case "CMaterial"
+		Return LoadMaterial( path )
 	End Select
+
 	Print "Max3d Error: Don't know how to import object of type '"+class+"'"
 	End
 End Function
 
-Function PixelFormat( t:TPixmap Var )
+Function m3dPixelFormat( t:TPixmap Var )
 	Select t.format
 	Case PF_ALPHA 
 		Return FORMAT_I8
@@ -200,4 +231,3 @@ Function PixelFormat( t:TPixmap Var )
 	Print "Max3d Error: Unknown pixel format"
 	End
 End Function
-	
