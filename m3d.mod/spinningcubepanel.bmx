@@ -1,13 +1,14 @@
 
 Strict
 
-Framework bmx3d.max3d
+Framework axe3d.m3d
 
 Import maxgui.drivers
 Import brl.timer
 Import brl.eventqueue
 
 Local m3dapp:TMax3dApplet
+
 m3dapp=New TMax3dApplet.Create("Max3dSDK (C)2007 Blitz Research Ltd.")
 While True
 	WaitEvent
@@ -41,7 +42,7 @@ Type TMax3dApplet
 	Field ground
 	
 	Method InitWorld(maxwidth,maxheight)
-		OpenMax3d	
+		InitMax3D m3dimporter	
 		SetClearColor 0,.1,.4
 		camera=CreateCamera()
 		MoveEntity camera,0,2,-2

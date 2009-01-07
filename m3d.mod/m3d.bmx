@@ -75,8 +75,8 @@ Function Max3dGraphics( w=0,h=0,d=0,r=60 )
 	If w>0
 		GLGraphics w,h,d,r,GRAPHICS_BACKBUFFER
 	EndIf
+	
 	InitMax3D m3dImporter
-
 End Function
 
 Rem
@@ -88,8 +88,7 @@ Function LoadShader( path$ )
 		source=LoadString( path )
 	EndIf
 	If source=""
-		Local name$=""+path+".glsl"
-		source=String.FromBytes( IncbinPtr( name ),IncbinLen( name ) )
+		source=String.FromBytes( IncbinPtr( path ),IncbinLen( path ) )
 	EndIf
 Rem
 	If path.StartsWith( "<" ) And path.EndsWith( ">" )
@@ -98,8 +97,8 @@ Rem
 	Else
 		source=LoadString( path )
 	EndIf
-	DebugLog "source:"+path+"("+source.length+" bytes)"
 EndRem	
+	DebugLog "source:"+path+"("+source.length+" bytes)"
 	Return CreateShader( source )
 End Function	
 
