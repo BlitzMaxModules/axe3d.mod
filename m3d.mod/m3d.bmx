@@ -84,7 +84,7 @@ bbdoc: LoadShader
 End Rem
 Function LoadShader( path$ )
 	Local source$
-	If source=""
+	If source="" And FileType(path)=FILETYPE_FILE
 		source=LoadString( path )
 	EndIf
 	If source=""
@@ -179,8 +179,6 @@ Function LoadMaterial( path$ )
 	If diffuse SetMaterialTexture material,"DiffuseMap",diffuse
 	Return material
 End Function
-
-Private
 
 Global Max3dImportDirs$[]=["media"]		'./{DEVDIR}/max3d"]
 
