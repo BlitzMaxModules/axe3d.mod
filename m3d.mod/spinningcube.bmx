@@ -2,7 +2,6 @@
 Strict
 
 Framework axe3d.m3d
-'Framework bmx3d.max3d
 
 Max3dGraphics 800,600
 
