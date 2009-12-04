@@ -1,6 +1,6 @@
 ' spinning cube
 
-Import sidesign.minib3d
+Import axe3d.minib3d
 
 graphics3d 800,600
 

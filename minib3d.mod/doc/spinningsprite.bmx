@@ -1,6 +1,6 @@
 ' spinning cube
 
-Import sidesign.minib3d
+Import axe3d.minib3d
 
 graphics3d 800,600
 
@@ -10,7 +10,7 @@ cube=LoadSprite("b-max.png")
 
 cube2=LoadSprite("b-max.png",0,cube)
 moveentity cube2,0,2,0
-scalesprite cube2,.5,.5,.5
+scalesprite cube2,.5,.5
 
 cam=createcamera()
 moveentity cam,0,0,-5
