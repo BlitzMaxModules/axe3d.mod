@@ -10,7 +10,7 @@ Import BRL.JPGLoader
 Import BRL.Retro
 'Import BRLrl.standardio
 
-Import axe3d.Blitz3D
+Import axe3d.Axe3D
 
 Import "externs.bmx"
 

@@ -1,7 +1,8 @@
 ' spinning cube
 
-Import axe3d.b3dsdk
+' change Flip -> bbFlip for sdk testing
 
+'Import axe3d.b3dsdk
 'Import axe3d.minib3d
 'Import axe3d.m3d
 'Import sidesign.minib3d
@@ -26,7 +27,7 @@ While Not KeyHit(KEY_ESCAPE)
 '	TurnEntity cube2,0,1,0
 	UpdateWorld
 	RenderWorld
-	bbFlip
+	Flip
 '	bbFlip
 '	Delay 20
 Wend

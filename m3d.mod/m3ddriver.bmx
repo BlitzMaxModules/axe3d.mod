@@ -3,7 +3,7 @@ Strict
 
 Import brl.map
 Import blitz3d.blitz3dsdk
-Import axe3d.Blitz3D
+Import axe3d.axe3d
 
 Import "m3dutil.bmx"
 

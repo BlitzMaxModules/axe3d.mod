@@ -4,7 +4,7 @@ Type TPivot Extends TMiniEntity
 	Method Update()
 	End Method
 	
-	Method CopyEntity:TEntity(parent_ent:axe3d.blitz3d.TEntity=Null)
+	Method CopyEntity:TEntity(parent_ent:TEntity=Null)
 
 		' new piv
 		Local piv:TPivot

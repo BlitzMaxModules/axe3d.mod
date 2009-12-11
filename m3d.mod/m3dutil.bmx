@@ -2,7 +2,7 @@
 Strict
 
 Import axe3d.ode
-Import axe3d.assimp
+'Import axe3d.assimp
 
 Import "m3dexterns.bmx"
 
