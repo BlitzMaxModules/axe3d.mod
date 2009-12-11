@@ -48,11 +48,14 @@ public:
 	void SetMaterial( CMaterial *material );
 	CMaterial *Material(){ return _material; }
 
+	virtual void OnRenderScene( CCamera *camera );
 	virtual void OnRenderCamera( CCamera *camera );
 	virtual void OnRenderInstances( const CHull &bounds )=0;
 	virtual void OnClearInstances();
 
 protected:
+	CSurface( CSurface *surf,CCopier *copier );
+
 	CShader *_shader;
 	CMaterial *_material;
 };

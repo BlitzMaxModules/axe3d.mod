@@ -40,7 +40,8 @@ static map<CMaterial*,CSpriteSurface*> _matMap;
 CSprite::CSprite():_surface(0){
 }
 
-CSprite::CSprite( CSprite *sprite,CCopier *copier ):CEntity( sprite,copier ),
+CSprite::CSprite( CSprite *sprite,CCopier *copier ):
+CEntity( sprite,copier ),
 _surface( sprite->_surface ){
 	if( _surface ) _surface->Retain();
 }
@@ -62,13 +63,11 @@ void CSprite::SetMaterial( CMaterial *material ){
 			surface=it->second;
 		}
 	}
-	if( surface ) surface->Retain();
-	if( _surface ) _surface->Release();
-	_surface=surface;
+	CResource::Assign( &_surface,surface );
 }
 
 CMaterial *CSprite::Material(){
-	return _surface->Material();
+	return _surface ? _surface->Material() : 0;
 }
 
 void CSprite::OnRenderWorld(){
@@ -76,7 +75,10 @@ void CSprite::OnRenderWorld(){
 	_surface->Instances().push_back( this );
 }
 
-CSpriteSurface::CSpriteSurface():_capacity(0),_vertexBuffer(0),_indexBuffer(0){
+CSpriteSurface::CSpriteSurface():
+_capacity(0),
+_vertexBuffer(0),
+_indexBuffer(0){
 	SetShader( App.ShaderUtil()->SpriteShader() );
 }
 
@@ -130,11 +132,11 @@ void CSpriteSurface::OnRenderCamera( CCamera *camera ){
 		_indexBuffer->Unlock();
 	}
 	const CVec3 v0(-1,1,0),v1(1,1,0),v2(1,-1,0),v3(-1,-1,0);
-	const CMat4 &viewMat=camera->InverseRenderMatrix();
+	CMat4 viewMat=camera->InverseRenderMatrix();
 	float *vp=(float*)_vertexBuffer->Lock();
 	for( int i=0;i<n;++i ){
 		CVec3 t=viewMat * _instances[i]->RenderMatrix().Translation();
-		*(CVec3*)vp=t+v0;
+		*(CVec3*)(vp)=t+v0;
 		*(CVec3*)(vp+12)=t+v1;
 		*(CVec3*)(vp+24)=t+v2;
 		*(CVec3*)(vp+36)=t+v3;
@@ -144,6 +146,7 @@ void CSpriteSurface::OnRenderCamera( CCamera *camera ){
 }
 
 void CSpriteSurface::OnRenderInstances( const CHull &bounds ){
+	if( !_instances.size() ) return;
 	App.Graphics()->SetVertexBuffer( _vertexBuffer );
 	App.Graphics()->SetIndexBuffer( _indexBuffer );
 	App.Graphics()->Render( 3,0,_instances.size()*6,1 );

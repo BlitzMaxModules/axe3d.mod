@@ -115,8 +115,8 @@ void CMirror::OnRenderWorld(){
 	App.Scene()->AddSurface( Surface() );
 }
 
-//Forwared here from CMirrorSurface::OnRenderCamera();
-void CMirror::OnRenderCamera( CCamera *camera ){
+//Forwared here from CMirrorSurface
+void CMirror::OnRenderScene( CCamera *camera ){
 	_surface->Instances().clear();
 	
 	//No recursion yet...
@@ -151,7 +151,7 @@ void CMirror::OnRenderCamera( CCamera *camera ){
 	mat.t.xyz()=eye;
 	mat=mir * mat;
 
-	_camera->SetMatrix( mat );
+	_camera->SetWorldMatrix( mat );
 	_camera->SetProjectionMatrix( proj );
 	
 	CTexture *cb=App.Graphics()->ColorBuffer( 0 );
@@ -166,6 +166,6 @@ CMirrorSurface::CMirrorSurface( CMirror *mirror ):
 _mirror( mirror ){
 }
 
-void CMirrorSurface::OnRenderCamera( CCamera *camera ){
-	_mirror->OnRenderCamera( camera );
+void CMirrorSurface::OnRenderScene( CCamera *camera ){
+	_mirror->OnRenderScene( camera );
 }

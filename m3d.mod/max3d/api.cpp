@@ -47,6 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "sprite.h"
 #include "terrain.h"
 #include "mirror.h"
+#include "bsptree.h"
 
 #if _WIN32
 #define API __declspec(dllexport)
@@ -70,8 +71,8 @@ extern "C"{	//these will need to be CDECL too for lua...
 //
 
 /// Initalize Max3d - must be called before any other commands
-API void m3dInitMax3D( void *importer ){
-	App.Init( (TObjectImporter)importer );
+API void m3dInitMax3D( void *importer,int flags ){
+	App.Init( (TObjectImporter)importer,flags );
 }
 
 API void m3dUseDegrees(){
@@ -80,6 +81,14 @@ API void m3dUseDegrees(){
 
 API void m3dUseRadians(){
 	to_radians=1.0f;
+}
+
+API void m3dSetObjectImportPath( CObject *obj,const char *path ){
+	obj->SetImportPath( path );
+}
+
+API const char *m3dGetObjectImportPath( CObject *obj ){
+	return c_str( obj->ImportPath() );
 }
 
 //***** Object API *****
@@ -96,6 +105,10 @@ _API CObject *m3dLoadMax3dObject( const char *path ){
 }
 
 //***** Resource API ******
+API void m3dFlushResources(){
+	CResource::FlushResources();
+}
+
 API void m3dRetainResource( CResource *obj ){
 	obj->Retain();
 }
@@ -115,10 +128,6 @@ API CTexture *m3dWhiteTexture(){
 
 API CTexture *m3dCreateTexture( int width,int height,int format,int flags ){
 	return App.Graphics()->CreateTexture( width,height,format,flags );
-}
-
-API void m3dSetTexturePath( CTexture *texture,const char *path ){
-	texture->SetPath( path );
 }
 
 API void m3dSetTextureData( CTexture *texture,const void *data ){
@@ -151,6 +160,14 @@ API CMaterial *m3dCreateMaterial(){
 	return new CMaterial;
 }
 
+API void m3dSetMaterialName( CMaterial *material,const char *name ){
+	material->SetName( name );
+}
+
+API const char *m3dGetMaterialName( CMaterial *material ){
+	return c_str( material->Name() );
+}
+
 API void m3dSetMaterialFloat( CMaterial *material,const char *name,float value ){
 	material->SetFloat( name,value );
 }
@@ -164,15 +181,18 @@ API void m3dSetMaterialTexture( CMaterial *material,const char *name,CTexture *t
 }
 
 //***** Surface API *****
-API CModelSurface *m3dCreateSurface(){
-	return new CModelSurface;
+API CModelSurface *m3dCreateSurface( CMaterial *material,CModel *model ){
+	CModelSurface *surface=new CModelSurface;
+	if( material ) surface->SetMaterial( material );
+	if( model ) model->AddSurface( surface );
+	return surface;
 }
 
 API void m3dSetSurfaceShader( CModelSurface *surface,CShader *shader ){
 	surface->SetShader( shader );
 }
 
-API CShader *m3dSurfaceShader( CModelSurface *surface ){
+API CShader *m3dGetSurfaceShader( CModelSurface *surface ){
 	return surface->Shader();
 }
 
@@ -180,8 +200,12 @@ API void m3dSetSurfaceMaterial( CModelSurface *surface,CMaterial *material ){
 	surface->SetMaterial( material );
 }
 
-API CMaterial *m3dSurfaceMaterial( CModelSurface *surface ){
+API CMaterial *m3dGetSurfaceMaterial( CModelSurface *surface ){
 	return surface->Material();
+}
+
+API void m3dClearSurface( CModelSurface *surface ){
+	surface->Clear();
 }
 
 API void m3dAddSurfaceVertex( CModelSurface *surface,float x,float y,float z,float s0,float t0 ){
@@ -218,24 +242,23 @@ API void m3dSetEntityParent( CEntity *entity,CEntity *parent ){
 	entity->SetParent( parent );
 }
 
+API CEntity *m3dEntityParent( CEntity *entity ){
+	return entity->Parent();
+}
+
+API float m3dEntityMatrixElement( CEntity *entity,int row,int column ){
+	return entity->WorldMatrix()[row][column];
+}
+
+// Translation stuff...
 API void m3dSetEntityTranslation( CEntity *entity,float x,float y,float z ){
-	entity->SetTranslation( CVec3( x,y,z ) );
-}
-
-API void m3dSetEntityRotation( CEntity *entity,float yaw,float pitch,float roll ){
-	entity->SetRotation( CQuat::YawPitchRollQuat( CVec3( yaw,pitch,roll ) * to_radians ) );
-}
-
-API void m3dSetEntityScale( CEntity *entity,float x,float y,float z ){
-	entity->SetScale( CVec3( x,y,z ) );
+	CVec3 v( x,y,z );
+	entity->SetTranslation( v );
 }
 
 API void m3dMoveEntity( CEntity *entity,float x,float y,float z ){
-	entity->Move( CVec3( x,y,z ) );
-}
-
-API void m3dTurnEntity( CEntity *entity,float yaw,float pitch,float roll ){
-	entity->Turn( CQuat::YawPitchRollQuat( CVec3( yaw,pitch,roll ) * to_radians ) );
+	CVec3 v( x,y,z );
+	entity->SetTranslation( entity->Translation() + CMat4::RotationMatrix( entity->Rotation() ) * v );
 }
 
 API float m3dEntityX( CEntity *entity ){
@@ -248,6 +271,35 @@ API float m3dEntityY( CEntity *entity ){
 
 API float m3dEntityZ( CEntity *entity ){
 	return entity->Translation().z;
+}
+
+// Rotation stuff...
+API void m3dSetEntityRotation( CEntity *entity,float yaw,float pitch,float roll ){
+	CQuat rot=CQuat::YawPitchRollQuat( CVec3( yaw,pitch,roll ) * to_radians );
+	entity->SetRotation( rot );
+}
+
+API void m3dTurnEntity( CEntity *entity,float yaw,float pitch,float roll ){
+	CQuat rot=CQuat::YawPitchRollQuat( CVec3( yaw,pitch,roll ) * to_radians );
+	entity->SetRotation( entity->Rotation() * rot );
+}
+
+API float m3dEntityYaw( CEntity *entity ){
+	return entity->Rotation().Yaw()/to_radians;
+}
+
+API float m3dEntityPitch( CEntity *entity ){
+	return entity->Rotation().Pitch()/to_radians;
+}
+
+API float m3dEntityRoll( CEntity *entity ){
+	return entity->Rotation().Roll()/to_radians;
+}
+
+// Scale stuff
+API void m3dSetEntityScale( CEntity *entity,float x,float y,float z ){
+	CVec3 v( x,y,z );
+	entity->SetScale( v );
 }
 
 //***** Model API *****
@@ -287,8 +339,12 @@ API CModel *m3dCreateBox( CMaterial *material,float width,float height,float dep
 	return model;
 }
 
-API void m3dAddModelSurface( CModel *model,CModelSurface *surface ){
-	model->AddSurface( surface );
+API int m3dCountModelSurfaces( CModel *model ){
+	return model->Surfaces().size();
+}
+
+API CModelSurface *m3dGetModelSurface( CModel *model,int index ){
+	return model->Surfaces()[ index ];
 }
 
 API void m3dUpdateModelNormals( CModel *model ){
@@ -297,6 +353,14 @@ API void m3dUpdateModelNormals( CModel *model ){
 
 API void m3dUpdateModelTangents( CModel *model ){
 	model->UpdateTangents();
+}
+
+API void m3dScaleModel( CModel *model,float x,float y,float z ){
+	model->Scale( CVec3( x,y,z ) );
+}
+
+API void m3dScaleModelSurfaces( CModel *model,float x,float y,float z ){
+	model->TransformSurfaces( CMat4::ScaleMatrix( CVec3( x,y,z ) ) );
 }
 
 API void m3dScaleModelTexCoords( CModel *model,float s_scale,float t_scale ){
@@ -309,6 +373,10 @@ API void m3dResetModelTransform( CModel *model ){
 
 API void m3dFlipModel( CModel *model ){
 	model->Flip();
+}
+
+API void m3dSplitModelEdges( CModel *model,float maxlength ){
+	model->SplitEdges( maxlength );
 }
 
 //***** Pivot API *****
@@ -339,6 +407,74 @@ API void m3dSetCameraFrustum( CCamera *camera,float left,float right,float botto
 
 API void m3dSetCameraPerspective( CCamera *camera,float fovy,float aspect,float zNear,float zFar ){
 	camera->SetProjectionMatrix( CMat4::PerspectiveMatrix( fovy * to_radians,aspect,zNear,zFar ) );
+}
+
+static CVec3 projectedPoint;
+
+API int m3dCameraProject( CCamera *camera,float x,float y,float z ){
+	CVec4 t=camera->ProjectionMatrix() * camera->InverseWorldMatrix() * CVec4( x,y,z,1 );
+	
+	projectedPoint=t.xyz()/t.w;
+	
+	projectedPoint=projectedPoint/2.0f+.5f;
+	
+	projectedPoint.xy()*=CVec2( camera->Viewport().width,camera->Viewport().height );
+	
+	return projectedPoint.z>0;
+}
+
+API float m3dProjectedPoint( int coord ){
+	return projectedPoint[coord];
+}
+
+static float pickedTime;
+static CVec3 pickedPoint;
+static CVec3 pickedNormal;
+static CEntity *pickedEntity;
+
+API CEntity *m3dCameraPick( CCamera *camera,float viewport_x,float viewport_y,int collType ){
+	
+	//not quite right - should go through inverse proj matrix for complete generality
+	//and all round sexiness.
+	
+	float farz=camera->FarZ();
+	
+	CVec3 o=camera->WorldMatrix().t.xyz();
+	
+	float ix=camera->ProjectionMatrix().i.x;
+	float jy=camera->ProjectionMatrix().j.y;
+	
+	CVec3 v=camera->WorldMatrix() * CVec3(
+		(viewport_x/camera->Viewport().width*2-1)/ix*farz,
+		(viewport_y/camera->Viewport().height*2-1)/jy*farz,
+		farz );
+
+	CLine ray( o,v-o );
+	
+//	cout<<ray<<endl;
+
+	if( CBody *body=App.World()->Physics()->TraceRay( ray,collType,&pickedTime,&pickedPoint,&pickedNormal ) ){
+		pickedEntity=(CEntity*)body->Data();
+	}else{
+		pickedEntity=0;
+	}
+	return pickedEntity;
+}
+
+API float m3dPickedPoint( int coord ){
+	return pickedPoint[coord];
+}
+
+API float m3dPickedNormal( int coord ){
+	return pickedNormal[coord];
+}
+
+API CEntity *m3dPickedEntity(){
+	return pickedEntity;
+}
+
+API float m3dPickedTime(){
+	return pickedTime;
 }
 
 //***** Light API *****
@@ -515,6 +651,42 @@ API void m3dUpdateWorld(){
 
 API void m3dRenderWorld(){
 	App.World()->Render();
+}
+
+//***** RenderPass API *****
+API void m3dAddRenderPass( CShader *shader,CMaterial *material ){
+	CRenderPass *pass=new CRenderPass;
+	pass->SetShader( shader );
+	pass->SetMaterial( material );
+	App.Scene()->AddRenderPass( pass );
+}
+
+API void m3dClearRenderPasses(){
+	App.Scene()->ClearRenderPasses();
+}
+
+//***** BSPTree API *****//
+
+_API CBSPTree *CreateModelBSP( CModel *model ){
+	return new CBSPTree( model );
+}
+
+_API int m3dCountBSPNodes( CBSPTree *tree ){
+	vector<CBSPNode*> nodes;
+	tree->Root()->EnumNodes( nodes );
+	return nodes.size();
+}
+
+_API int m3dCountBSPLeaves( CBSPTree *tree ){
+	vector<CBSPNode*> leaves;
+	tree->Root()->EnumLeaves( leaves );
+	return leaves.size();
+}
+
+_API CModel *CreateBSPModel( CBSPTree *tree ){
+	CModel *model=tree->BuildModel();
+	model->SetVisible( true );
+	return model;
 }
 
 }

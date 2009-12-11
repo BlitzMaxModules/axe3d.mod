@@ -38,8 +38,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "app.h"
 #include "openglgraphics.h"
 
-static bool gpu_instancing;
-
 enum{
 	DIRTY_SHADERPROG=1,
 	DIRTY_FRAMEBUFFER=2
@@ -61,14 +59,6 @@ static void CheckGL(){
 	default:str="UNKNOWN";
 	}
     Error( string("GL Error: ")+str );
-}
-
-static string ShaderInfoLog( int what ){
-	char buf[1024];
-	buf[0]=0;
-	glGetShaderInfoLog( what,1023,0,buf );
-	buf[1023]=0;
-	return buf;
 }
 
 static void SplitShaderSegs( const string &source,string segs[3] ){
@@ -111,6 +101,14 @@ static map<string,string> SplitShaderModes( const string &source ){
 	return pmap;
 }
 
+static string ShaderInfoLog( GLuint what ){
+	char buf[1024];
+	buf[0]=0;
+	glGetShaderInfoLog( what,1023,0,buf );
+	buf[1023]=0;
+	return buf;
+}
+
 static GLuint CompileShader( int target,const string &source ){
 	char *cstr=strdup( source.c_str() );
 	GLuint shader=glCreateShader( target );
@@ -131,6 +129,44 @@ static GLuint CompileShader( int target,const string &source ){
 		Error( "" );
 	}
 	return shader;
+}
+
+static string ProgramInfoLog( GLuint what ){
+	char buf[1024];
+	buf[0]=0;
+	glGetProgramInfoLog( what,1023,0,buf );
+	buf[1023]=0;
+	return buf;
+}
+
+static GLuint LinkProgram( GLuint vs,GLuint fs ){
+	GLuint prog=glCreateProgram();
+	glAttachShader( prog,vs );
+	glAttachShader( prog,fs );
+	glBindAttribLocation( prog,0,"Attrib0" );
+	glBindAttribLocation( prog,1,"Attrib1" );
+	glBindAttribLocation( prog,2,"Attrib2" );
+	glBindAttribLocation( prog,3,"Attrib3" );
+	glBindAttribLocation( prog,4,"Attrib4" );
+	glBindAttribLocation( prog,5,"Attrib5" );
+	glBindAttribLocation( prog,6,"Attrib6" );
+	glBindAttribLocation( prog,7,"Attrib7" );
+	glBindAttribLocation( prog,0,"bb_Vertex" );
+	glBindAttribLocation( prog,1,"bb_Normal" );
+	glBindAttribLocation( prog,2,"bb_Tangent" );
+	glBindAttribLocation( prog,3,"bb_TexCoords0" );
+	glBindAttribLocation( prog,4,"bb_TexCoords1" );
+	glBindAttribLocation( prog,5,"bb_Weights" );
+	glBindAttribLocation( prog,6,"bb_Bones" );
+	glLinkProgram( prog );
+	int status;
+	glGetProgramiv( prog,GL_LINK_STATUS,&status );
+	if( status!=GL_TRUE ){
+		cout<<"SHADER LINK ERROR"<<endl;
+		cout<<ProgramInfoLog( prog )<<endl;
+		Error( "" );
+	}
+	return prog;
 }
 
 // VertexBuffer implementation
@@ -379,6 +415,13 @@ public:
 		}
 		if( _flags & TEXTURE_MIPMAP ){
 			glTexParameteri( _gltarget,GL_GENERATE_MIPMAP,GL_TRUE );
+			if( App.Flags() & MAX3D_AUTOMAXANISOTROPIC ){
+				if( _gltarget==GL_TEXTURE_2D && GLEE_EXT_texture_filter_anisotropic ){
+					float maxAnisotropy;
+					glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT,&maxAnisotropy );
+					glTexParameterf( _gltarget,GL_TEXTURE_MAX_ANISOTROPY_EXT,maxAnisotropy );
+				}
+			}
 		}
 		if( _flags & TEXTURE_CLAMPS ){
 			glTexParameteri( _gltarget,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE );
@@ -565,7 +608,7 @@ public:
 		
 		switch( _gltype ){
 		case GL_FLOAT:
-			glUniform1fv( _glloc,1,_param->FloatValue() );
+			glUniform1fv( _glloc,_param->Count(),_param->FloatValue() );
 			break;
 		case GL_FLOAT_VEC2:
 			glUniform2fv( _glloc,1,_param->FloatValue() );
@@ -616,7 +659,7 @@ public:
 	GLShaderProg():_glprog(0),_instanceIdLoc(-1){
 	}
 
-	GLShaderProg *Create( string source ){
+	GLShaderProg *Create( string source,vector<CParam*> &params ){
 
 		string segs[3];
 		SplitShaderSegs( source,segs );
@@ -630,29 +673,7 @@ public:
 		GLuint vs=CompileShader( GL_VERTEX_SHADER,vert );
 		GLuint fs=CompileShader( GL_FRAGMENT_SHADER,frag );
 
-		_glprog=glCreateProgram();
-
-		glAttachShader( _glprog,vs );
-		glAttachShader( _glprog,fs );
-
-		glBindAttribLocation( _glprog,0,"Attrib0" );
-		glBindAttribLocation( _glprog,1,"Attrib1" );
-		glBindAttribLocation( _glprog,2,"Attrib2" );
-		glBindAttribLocation( _glprog,3,"Attrib3" );
-		glBindAttribLocation( _glprog,4,"Attrib4" );
-		glBindAttribLocation( _glprog,5,"Attrib5" );
-		glBindAttribLocation( _glprog,6,"Attrib6" );
-		glBindAttribLocation( _glprog,7,"Attrib7" );
-
-		glBindAttribLocation( _glprog,0,"bb_Vertex" );
-		glBindAttribLocation( _glprog,1,"bb_Normal" );
-		glBindAttribLocation( _glprog,2,"bb_Tangent" );
-		glBindAttribLocation( _glprog,3,"bb_TexCoords0" );
-		glBindAttribLocation( _glprog,4,"bb_TexCoords1" );
-		glBindAttribLocation( _glprog,5,"bb_Weights" );
-		glBindAttribLocation( _glprog,6,"bb_Bones" );
-
-		glLinkProgram( _glprog );
+		_glprog=LinkProgram( vs,fs );
 
 		glDeleteShader( vs );
 		glDeleteShader( fs );
@@ -700,9 +721,13 @@ public:
 			
 //			cout<<"Param="<<name<<" id="<<CParam::IdForName( name )<<endl;
 
-			GLParam *p=new GLParam( CParam::ForName( name ),size,type,glGetUniformLocation( _glprog,name ),unit );
+			CParam *p=CParam::ForName( name );
+			
+			params.push_back( p );
+			
+			GLParam *glp=new GLParam( p,size,type,glGetUniformLocation( _glprog,name ),unit );
 
-			_glparams.push_back( p );
+			_glparams.push_back( glp );
 		}
 		CheckGL();
 		return this;
@@ -742,11 +767,11 @@ public:
 		map<string,string> pmap=SplitShaderModes( source );
 	
 		string common=
-		"//@common\n";
+		"//@common\n"
+		"#version 120\n";
 		
-		if( gpu_instancing ){
+		if( GLEE_EXT_draw_instanced ){
 			common+=
-			"#version 120\n"
 			"#extension GL_EXT_gpu_shader4 : enable\n"
 			"#define bb_InstanceID gl_InstanceID\n";
 		}else{
@@ -769,7 +794,8 @@ public:
 		for( map<string,string>::iterator it=pmap.begin();it!=pmap.end();++it ){
 			int mode=ModeForName( it->first );
 			string modeDef="#define BB_MODE BB_"+toupper( it->first )+"\n";
-			_shaders[mode]=(new GLShaderProg)->Create( common+modeDef+header+it->second );
+			GLShaderProg *prog=(new GLShaderProg)->Create( common+modeDef+header+it->second,_params );
+			_shaders[mode]=prog;
 			_modeMask|=(1<<mode);
 		}
 		return this;
@@ -793,9 +819,7 @@ _dirty(~0){
 	if( !GLEE_EXT_framebuffer_object ){
 		Error( "Max3d requires OpenGL EXT_framebuffer_object extension" );
 	}
-	if( GLEE_EXT_draw_instanced ){
-		gpu_instancing=true;
-	}
+	
 	int vp[4];
 	glGetIntegerv( GL_VIEWPORT,vp );
 	_windowWidth=vp[2];
@@ -832,21 +856,18 @@ void COpenGLGraphics::BeginScene(){
 }
 
 void COpenGLGraphics::SetColorBuffer( int index,CTexture *texture ){
-	if( texture ) texture->Retain();
-	if( _colorBuffers[index] ) _colorBuffers[index]->Release();
-	_colorBuffers[index]=texture;
+	CResource::Assign( &_colorBuffers[index],texture );
 	_dirty|=DIRTY_FRAMEBUFFER;
 }
 
 void COpenGLGraphics::SetDepthBuffer( CTexture *texture ){
-	if( texture ) texture->Retain();
-	if( _depthBuffer ) _depthBuffer->Release();
-	_depthBuffer=texture;
+	CResource::Assign( &_depthBuffer,texture );
 	_dirty|=DIRTY_FRAMEBUFFER;
 }
 
-void COpenGLGraphics::SetViewport( int x,int y,int width,int height ){
-	glViewport( x,y,width,height );
+void COpenGLGraphics::SetViewport( const CRect &viewport ){
+	_viewport=viewport;
+	glViewport( (int)viewport.x,(int)viewport.y,(int)viewport.width,(int)viewport.height );
 }
 
 void COpenGLGraphics::SetShaderMode( int mode ){
@@ -946,22 +967,18 @@ void COpenGLGraphics::SetCullMode( int mode ){
 }
 
 void COpenGLGraphics::SetShader( CShader *shader ){
-	if( shader ) shader->Retain();
-	if( _shader ) _shader->Release();
-	_shader=shader;
+	CResource::Assign( &_shader,shader );
 	_dirty|=DIRTY_SHADERPROG;
 }
 
 void COpenGLGraphics::SetVertexBuffer( CVertexBuffer *buffer ){
-	if( buffer ) buffer->Retain();
-	if( _vertexBuffer ) _vertexBuffer->Release();
-	if( _vertexBuffer=buffer ) ((GLVertexBuffer*)buffer)->Bind();
+	CResource::Assign( &_vertexBuffer,buffer );
+	if( buffer ) ((GLVertexBuffer*)buffer)->Bind();
 }
 
 void COpenGLGraphics::SetIndexBuffer( CIndexBuffer *buffer ){
-	if( buffer ) buffer->Retain();
-	if( _indexBuffer ) _indexBuffer->Release();
-	if( _indexBuffer=buffer ) ((GLIndexBuffer*)buffer)->Bind();
+	CResource::Assign( &_indexBuffer,buffer );
+	if( buffer ) ((GLIndexBuffer*)buffer)->Bind();
 }
 
 void COpenGLGraphics::SetClipPlane( int index,const float params[4] ){
@@ -977,6 +994,7 @@ void COpenGLGraphics::SetClipPlane( int index,const float params[4] ){
 void COpenGLGraphics::Clear(){
 	ValidateFrameBuffer();
 	glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT );
+//	glClear( GL_DEPTH_BUFFER_BIT );
 }
 
 void COpenGLGraphics::ValidateShaderProg(){
@@ -1049,7 +1067,7 @@ void COpenGLGraphics::Render( int what,int first,int count,int instances ){
 		cout<<"vp="<<vp<<", fp="<<fp<<endl;
 		 */
 
-		if( gpu_instancing ){
+		if( GLEE_EXT_draw_instanced ){
 			if( GLIndexBuffer *ib=(GLIndexBuffer*)_indexBuffer ){
 				glDrawElementsInstancedEXT( prim,count,ib->GLType(),(void*)(first*ib->Pitch()),instances );
 			}else{

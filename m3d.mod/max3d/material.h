@@ -39,10 +39,13 @@ class CMaterial : public CResource{
 public:
 	CMaterial();
 	~CMaterial();
-
+	
+	void SetName( string name );
+	string Name(){ return _name; }
+	
 	void SetFloat( string name,float value );
 	float Float( string name );
-
+	
 	void SetColor( string name,const CVec3 &value );
 	CVec3 Color( string name );
 
@@ -55,6 +58,7 @@ public:
 	void OnWrite( CStream *stream );
 
 private:
+	string _name;
 	map<CParam*,float> _floats;
 	map<CParam*,CVec3> _colors;
 	map<CParam*,CTexture*> _textures;

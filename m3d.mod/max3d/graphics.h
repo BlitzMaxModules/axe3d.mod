@@ -37,6 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #define USE_GL_TEXTURE_RECTANGLE_ARB
 
+class CParam;
+
 /// Abstract base class for vertex buffers
 class CVertexBuffer : public CResource{
 public:
@@ -81,9 +83,6 @@ public:
 	virtual void Set3dData( const void *data )=0;
 	virtual void SetCubeData( const void *data )=0;
 	
-	void SetPath( string path );
-	string Path(){ return _path; }
-
 	int Width(){ return _width; }
 	int Height(){ return _height; }
 	int Depth(){ return _depth; }
@@ -93,7 +92,6 @@ public:
 protected:
 	CTexture(){}
 
-	string _path;
 	int _width;
 	int _height;
 	int _depth;
@@ -105,13 +103,16 @@ protected:
 class CShader : public CResource{
 public:
 	int ModeMask(){ return _modeMask; }
-
+	
+	const vector<CParam*> &Params(){ return _params; }
+	
 	static int ModeForName( string name );
 
 protected:
 	CShader(){}
 
 	int _modeMask;
+	vector<CParam*> _params;
 };
 
 /// Function to return computed float values for shader params
@@ -177,7 +178,7 @@ public:
 	virtual void BeginScene()=0;
 	virtual void SetColorBuffer( int index,CTexture *texture )=0;
 	virtual void SetDepthBuffer( CTexture *texture )=0;
-	virtual void SetViewport( int x,int y,int width,int height )=0;
+	virtual void SetViewport( const CRect &viewport )=0;
 	virtual void SetShaderMode( int mode )=0;
 	virtual void SetWriteMask( int mask )=0;
 	virtual void SetBlendFunc( int src,int dst )=0;
@@ -211,6 +212,7 @@ public:
 	void AppendShaderHeader( string header ){ _shaderHeader+=header; }
 	CTexture *ColorBuffer( int index ){ return _colorBuffers[index]; }
 	CTexture *DepthBuffer(){ return _depthBuffer; }
+	const CRect &Viewport(){ return _viewport; }
 	CVertexBuffer *VertexBuffer(){ return _vertexBuffer; }
 	CIndexBuffer *IndexBuffer(){ return _indexBuffer; }
 	CShader *Shader(){ return _shader; }
@@ -222,6 +224,7 @@ protected:
 	string _shaderHeader;
 	CTexture *_colorBuffers[4];
 	CTexture *_depthBuffer;
+	CRect _viewport;
 	CVertexBuffer *_vertexBuffer;
 	CIndexBuffer *_indexBuffer;
 	CShader *_shader;

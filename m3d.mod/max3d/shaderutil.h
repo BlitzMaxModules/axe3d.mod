@@ -47,7 +47,7 @@ public:
 	CShader *SpotLightShader(){ return _spotLightShader; }
 	CShader *PointLightShader(){ return _pointLightShader; }
 	CShader *DistantLightShader(){ return _distantLightShader; }
-
+	
 private:
 	CShader *_modelShader;
 	CShader *_spriteShader;

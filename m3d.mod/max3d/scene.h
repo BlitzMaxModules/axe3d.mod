@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "camera.h"
 #include "light.h"
 #include "surface.h"
+#include "renderpass.h"
 
 class CScene : public CObject{
 public:
@@ -53,10 +54,15 @@ public:
 	void AddSurface( CSurface *surface );
 	const vector<CSurface*> &Surfaces(){ return _surfaces; }
 	
+	void AddRenderPass( CRenderPass *pass );
+	void ClearRenderPasses();
+	
 	void SetShadowsEnabled( bool enabled );
 	bool ShadowsEnabled(){ return _shadowsEnabled; }
 	
 	void RenderCamera( CCamera *camera );
+	
+	void RenderQuad( const CRect &rect,CShader *shader,CMaterial *material );
 
 private:
 	void SetShaderMode( string mode );
@@ -79,6 +85,8 @@ private:
 	vector<CCamera*> _cameras;
 	vector<CLight*> _lights;
 	vector<CSurface*> _surfaces;
+	
+	vector<CRenderPass*> _passes;
 };
 
 #endif

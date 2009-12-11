@@ -91,7 +91,7 @@ void CWorld::Update(){
 	for( it=_entities.begin();it!=_entities.end();++it ){
 		CEntity *entity=*it;
 		if( CBody *body=entity->Body() ){
-			body->Validate( entity->Matrix(),entity->MatrixModified() );
+			body->Validate( entity->WorldMatrix(),entity->MatrixModified() );
 		}
 	}
 
@@ -99,7 +99,7 @@ void CWorld::Update(){
 	for( it=_entities.begin();it!=_entities.end();++it ){
 		CEntity *entity=*it;
 		if( CJoint *joint=entity->Joint() ){
-			joint->Validate( entity->Matrix(),entity->MatrixModified() );
+			joint->Validate( entity->WorldMatrix(),entity->MatrixModified() );
 		}
 	}
 	
@@ -110,9 +110,9 @@ void CWorld::Update(){
 	for( it=_entities.begin();it!=_entities.end();++it ){
 		CEntity *entity=*it;
 		if( CBody *body=entity->Body() ){
-			entity->SetMatrix( body->Animate() );
+			entity->SetWorldMatrix( body->Animate() );
 		}else if( CJoint *joint=entity->Joint() ){
-			entity->SetMatrix( joint->Animate() );
+			entity->SetWorldMatrix( joint->Animate() );
 		}
 	}
 
@@ -135,7 +135,8 @@ void CWorld::Render(){
 	
 	App.Graphics()->BeginScene();
 	
-	App.Graphics()->SetVec3Param( "bb_ClearColor",ClearColor() );
+	App.Graphics()->SetVec4Param( "bb_ClearColor",CVec4( ClearColor(),1.0f ) );
+	
 	App.Graphics()->SetVec3Param( "bb_AmbientColor",AmbientColor() );
 	
 	for( vector<CCamera*>::const_iterator it=App.Scene()->Cameras().begin();it!=App.Scene()->Cameras().end();++it ){

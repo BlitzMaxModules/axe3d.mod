@@ -45,10 +45,11 @@ void stdparams_init();
 CApp::CApp(){
 }
 
-void CApp::Init( TObjectImporter importer ){
+void CApp::Init( TObjectImporter importer,int flags ){
 
 	_importer=importer;
-
+	_flags=flags;
+	
 	_graphics=new COpenGLGraphics;
 
 	stdparams_init();

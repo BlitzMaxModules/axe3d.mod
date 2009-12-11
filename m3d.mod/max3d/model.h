@@ -41,16 +41,20 @@ class CModel : public CEntity{
 public:
 	CModel();
 	~CModel();
-
+	
 	void AddSurface( CModelSurface *surface );
+	void RemoveSurface( CModelSurface *surface );
 	const vector<CModelSurface*> &Surfaces(){ return _surfaces; }
 	
 	void Clear();
 	void Flip();
 	void UpdateNormals();
 	void UpdateTangents();
+	void Scale( const CVec3 &v );
+	void TransformSurfaces( const CMat4 &matrix );
 	void ScaleTexCoords( float s_scale,float t_scale );
 	void ResetTransform();
+	void SplitEdges( float length );
 	void Optimize();
 	
 	virtual void OnRenderWorld();
@@ -77,6 +81,8 @@ public:
 	CVertex( float x,float y,float z ):position( CVec3(x,y,z) ),weights(1,0,0,0),bones(0){}
 
 	bool operator<( const CVertex &q )const{ return memcmp( &position,&q.position,sizeof(q) )<0; }
+
+	CVertex Blend( const CVertex &v,float t )const;
 };
 
 class CTriangle{
@@ -100,11 +106,14 @@ public:
 	void AddSurface( CModelSurface *surface );
 
 	void Clear();
+	void ClearVertices();
+	void ClearTriangles();
 	void Flip();
 	void UpdateNormals();
 	void UpdateTangents();
 	void ScaleTexCoords( float s_scale,float t_scale );
 	void Transform( const CMat4 &matrix,const CMat4 &itMatrix );
+	void SplitEdges( float length );
 	void Optimize();
 
 	const CBox &Bounds();
@@ -115,8 +124,11 @@ public:
 	
 	void OnRenderInstances( const CHull &bounds );
 	void OnClearInstances();
-	
+
 private:
+	CModelSurface( CModelSurface *surf,CCopier *copier );
+	CModelSurface *OnCopy( CCopier *copier ){ return new CModelSurface( this,copier ); }
+
 	void ValidateBounds();
 	void ValidateBuffers();
 	void RenderInstances( int first,int count );

@@ -34,10 +34,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "graphics.h"
 
-void CTexture::SetPath( string path ){
-	_path=path;
-}
-
 CGraphics::CGraphics():
 _depthBuffer(0),
 _vertexBuffer(0),
@@ -95,9 +91,7 @@ const float *CParam::FloatValue(){
 }
 
 void CParam::SetTextureValue( CTexture *value ){
-	if( value ) value->Retain();
-	if( _texture ) _texture->Release();
-	_texture=value;
+	CResource::Assign( &_texture,value );
 	Invalidate();
 }
 

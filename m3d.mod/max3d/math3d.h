@@ -54,16 +54,90 @@ struct CRect{
 struct CVec2{
 	float x,y;
 	
-	CVec2():x(0),y(0){
-	}
-	CVec2( float x,float y ):x(x),y(y){
-	}
+	CVec2():x(0),y(0){}
+	CVec2( float x,float y ):x(x),y(y){}
 
 	float &operator[]( int i ){
-		return *(&x+i);
+		return *(&x+i); 
 	}
+	
 	float operator[]( int i )const{
 		return *(&x+i);
+	}
+	
+	CVec2 operator-()const{
+		return CVec2( -x,-y );
+	}
+	CVec2 operator+( float t )const{
+		return CVec2( x+t,y+t );
+	}
+	CVec2 operator-( float t )const{
+		return CVec2( x-t,y-t );
+	}
+	CVec2 operator*( float t )const{
+		return CVec2( x*t,y*t );
+	}
+	CVec2 operator/( float t )const{
+		return CVec2( x/t,y/t );
+	}
+	CVec2 operator+( const CVec2 &t )const{
+		return CVec2( x+t.x,y+t.y );
+	}
+	CVec2 operator-( const CVec2 &t )const{
+		return CVec2( x-t.x,y-t.y );
+	}
+	CVec2 operator*( const CVec2 &t )const{
+		return CVec2( x*t.x,y*t.y );
+	}
+	CVec2 operator/( const CVec2 &t )const{
+		return CVec2( x/t.x,y/t.y );
+	}
+	
+	CVec2 &operator+=( const CVec2 &v ){
+		x+=v.x;y+=v.y;return *this;
+	}
+	CVec2 &operator-=( const CVec2 &v ){
+		x-=v.x;y-=v.y;return *this;
+	}
+	CVec2 &operator*=( const CVec2 &v ){
+		x*=v.x;y*=v.y;return *this;
+	}
+	CVec2 &operator/=( const CVec2 &v ){
+		x/=v.x;y/=v.y;return *this;
+	}
+	CVec2 &operator*=( float t ){
+		x*=t;y*=t;return *this;
+	}
+	CVec2 &operator/=( float t ){
+		x/=t;y/=t;return *this;
+	}
+	bool operator==( const CVec2 &v )const{
+		return (x==v.x && y==v.y);
+	}
+	
+	float Dot( const CVec2 &t )const{ 
+		return x*t.x+y*t.y;
+	}
+	float Length()const{
+		return sqrtf( x*x+y*y );
+	}
+	float Distance( const CVec2 &t )const{
+		return (*this-t).Length();
+	}
+	CVec2 Normalize()const{
+		return *this/Length();
+	}
+	CVec2 Blend( const CVec2 &t,float alpha )const{
+		return (t-*this)*alpha+*this;
+	}
+	
+	void Write( CStream *stream ){
+		stream->WriteData( &x,8 );
+	}
+	static CVec2 Read( CStream *stream ){
+		CVec2 v;
+		stream->ReadData( &v.x,8 );
+		return v;
 	}
 };
 
@@ -132,6 +206,13 @@ struct CVec3{
 	}
 	bool operator==( const CVec3 &v )const{
 		return (x==v.x && y==v.y && z==v.z);
+	}
+	
+	CVec2 &xy(){
+		return (CVec2&)*this;
+	}
+	const CVec2 &xy()const{
+		return (CVec2&)*this;
 	}
 	
 	float Dot( const CVec3 &t )const{ 
@@ -221,7 +302,13 @@ struct CVec4{
 	bool operator==( const CVec4 &v )const{
 		return (x==v.x && y==v.y && z==v.z && w==v.w);
 	}
-	
+
+	CVec2 &xy(){
+		return (CVec2&)*this;
+	}
+	const CVec2 &xy()const{
+		return (CVec2&)*this;
+	}
 	CVec3 &xyz(){
 		return (CVec3&)*this;
 	}
@@ -245,6 +332,18 @@ struct CLine{
 	
 	CLine( const CVec3 &o,const CVec3 &d ):o(o),d(d){
 	}
+
+	float Length()const{
+		return d.Length();
+	}
+	
+	CLine Normalize()const{
+		return CLine( o,d.Normalize() );
+	}
+	
+	CVec3 Evaluate( float time )const{
+		return o+d*time;
+	}
 };
 
 struct CPlane{
@@ -253,11 +352,16 @@ struct CPlane{
 	
 	CPlane():d(0){
 	}
+
 	CPlane( const CVec3 &n,float d ):n(n),d(d){
 	}
-	CPlane( const CVec3 &v0,const CVec3 &v1,const CVec3 &v2 ){
-		n=(v2-v1).Cross(v0-v1).Normalize();
-		d=-n.Dot( v0 );
+	
+	CPlane operator-()const{
+		return CPlane( -n,-d );
+	}
+	
+	bool operator==( const CPlane &p )const{
+		return n==p.n && d==p.d;
 	}
 	
 	float SolveX( float y,float z )const{
@@ -275,10 +379,19 @@ struct CPlane{
 	float Distance( const CVec3 &v )const{
 		return n.Dot( v )+d;
 	}
+
 	CPlane Normalize()const{
 		float t=1/n.Length();
 		return CPlane( n*t,d*t );
 	}
+	
+	static CPlane TrianglePlane( const CVec3 &v0,const CVec3 &v1,const CVec3 &v2 ){
+		CPlane p;
+		p.n=(v2-v1).Cross(v0-v1).Normalize();
+		p.d=-p.n.Dot( v0 );
+		return p;
+	}
+	
 };
 
 struct CBox{
@@ -468,6 +581,20 @@ struct CQuat{
 		float xx=v.x*v.x,yy=v.y*v.y;
 		return CVec3( 2*(xz-wy),2*(yz+wx),1-2*(xx+yy) );
 	}	
+	
+	float Yaw()const{
+		float x2=v.x*v.x,y2=v.y*v.y;
+		return atan2f( 2*v.y*w-2*v.z*v.x,1-2*y2-2*x2 );
+	}
+	
+	float Pitch()const{
+		return -asinf( 2*v.z*v.y+2*v.x*w );
+	}
+	
+	float Roll()const{
+		float x2=v.x*v.x,z2=v.z*v.z;
+		return -atan2f( 2*v.z*w-2*v.y*v.x,1-2*z2-2*x2 );
+	}
 
 	CVec3 YawPitchRoll()const{
 		CVec3 r;
@@ -713,6 +840,11 @@ struct CMat4{
 		r.k.z=s.z;
 		return r;
 	}
+	
+	static CMat4 TRSMatrix( const CVec3 &trans,const CQuat &rot,const CVec3 &scale ){
+		//TODO: Optimize me!
+		return TranslationMatrix( trans ) * RotationMatrix( rot ) * ScaleMatrix( scale );
+	}
 
 	static CMat4 YawMatrix( float q ){
 		return CMat4( CVec4(cosf(q),0,sinf(q),0),CVec4(0,1,0,0),CVec4(-sinf(q),0,cosf(q),0),CVec4(0,0,0,1) );
@@ -775,5 +907,6 @@ ostream &operator<<( ostream &o,const CVec3 &v );
 ostream &operator<<( ostream &o,const CVec4 &v );
 ostream &operator<<( ostream &o,const CPlane &p );
 ostream &operator<<( ostream &o,const CMat4 &m );
+ostream &operator<<( ostream &o,const CLine &t );
 
 #endif
