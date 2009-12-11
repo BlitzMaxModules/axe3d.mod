@@ -1,0 +1,8 @@
+The Blitz3D Compatability Module contains command definitions and documentation for using the standard Blitz3D API in a BlitzMax environment.
+
+It also provides a standard interface to 3D graphics engines by abstracting a standard driver class similar in design to that of the MaxGUI module.
+
+The TEntity type, like TGadget is a monolothic interface. This allows the driver developer maximum freedom to abstract the different Entity types the way they see fit while benefitting from a predefined and documented functional interface.
+
++Entities
+

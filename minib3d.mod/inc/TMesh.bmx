@@ -1,4 +1,4 @@
-Type TMesh Extends TEntity
+Type TMesh Extends TMiniEntity
 	
 	Field min_x#,min_y#,min_z#,max_x#,max_y#,max_z#
 
@@ -33,19 +33,19 @@ Type TMesh Extends TEntity
 	
 	End Method
 	
-	Method CopyEntity:TMesh(parent_ent:TEntity=Null)
+	Method CopyEntity:TEntity(parent_ent:TEntity=Null)
 
 		' new mesh
 		Local mesh:TMesh=New TMesh
 		
-		Clone(mesh,parent_ent)
+		Clone(mesh,TMiniEntity(parent_ent))
 		
 		mesh.auto_fade=auto_fade
 		mesh.fade_near#=fade_near
 		mesh.fade_far#=fade_far
 		
 		mesh.brush=Null
-		mesh.brush=brush.Copy()
+		mesh.brush=TMiniBrush(brush.Copy())
 		
 		mesh.anim=anim
 		mesh.anim_render=anim_render
@@ -88,9 +88,9 @@ Type TMesh Extends TEntity
 		mesh.surf_list=surf_list
 		
 		' copy anim surf list
-		For Local surf:TSurface=EachIn anim_surf_list
+		For Local surf:TMiniSurface=EachIn anim_surf_list
 		
-			Local new_surf:TSurface=New TSurface
+			Local new_surf:TMiniSurface=New TMiniSurface
 			ListAddLast(mesh.anim_surf_list,new_surf)
 			
 			new_surf.no_verts=surf.no_verts
@@ -144,11 +144,11 @@ Type TMesh Extends TEntity
 
 		mesh.class$="Mesh"
 	
-		mesh.AddParent(parent_ent:TEntity)
+		mesh.SetParent(parent_ent:TEntity)
 		mesh.EntityListAdd(entity_list)
 
 		' update matrix
-		mesh.UpdateMat()
+		mesh.Dirty()
 	
 		Return mesh
 
@@ -163,11 +163,11 @@ Type TMesh Extends TEntity
 		
 		mesh.class$="Mesh"
 
-		mesh.AddParent(parent_ent:TEntity)
+		mesh.SetParent(parent_ent:TEntity)
 		mesh.EntityListAdd(entity_list)
 
 		' update matrix
-		mesh.UpdateMat()
+		mesh.Dirty()
 		
 		Return mesh
 	
@@ -187,7 +187,7 @@ Type TMesh Extends TEntity
 	
 		Local mesh:TMesh=TMesh.CreateMesh(parent_ent)
 	
-		Local surf:TSurface=mesh.CreateSurface()
+		Local surf:TMiniSurface=TMiniSurface(mesh.CreateSurface())
 			
 		surf.AddVertex(-1.0,-1.0,-1.0)
 		surf.AddVertex(-1.0, 1.0,-1.0)
@@ -332,7 +332,7 @@ Type TMesh Extends TEntity
 		If segments<2 Or segments>100 Then Return Null
 		
 		Local thissphere:TMesh=TMesh.CreateMesh(parent_ent)
-		Local thissurf:TSurface=thissphere.CreateSurface()
+		Local thissurf:TMiniSurface=TMiniSurface(thissphere.CreateSurface())
 
 		Local div#=Float(360.0/(segments*2))
 		Local height#=1.0
@@ -694,7 +694,7 @@ Type TMesh Extends TEntity
 	
 		For Local s1=1 To CountSurfaces()
 			
-			Local surf1:TSurface=GetSurface(s1)
+			Local surf1:TMiniSurface=TMiniSurface(GetSurface(s1))
 
 			' if surface is empty, don't add it
 			If surf1.CountVertices()=0 And surf1.CountTriangles()=0 Continue
@@ -704,16 +704,16 @@ Type TMesh Extends TEntity
 			For Local s2=1 To mesh2.CountSurfaces()	
 			'For Local s2=1 To cs2
 			
-				Local surf2:TSurface=mesh2.GetSurface(s2)
+				Local surf2:TMiniSurface=TMiniSurface(mesh2.GetSurface(s2))
 				
 				Local no_verts2=surf2.CountVertices()
 	
 				' if brushes properties are the same, add surf1 verts and tris to surf2
-				If TBrush.CompareBrushes(surf1.brush,surf2.brush)=True
+				If surf1.brush=surf2.brush
 				
 					' add vertices
 				
-					For Local v=0 To surf1.CountVertices()-1
+					For Local v=0 Until surf1.CountVertices()
 		
 						Local vx#=surf1.VertexX#(v)
 						Local vy#=surf1.VertexY#(v)
@@ -742,7 +742,7 @@ Type TMesh Extends TEntity
 		
 					' add triangles
 				
-					For Local t=0 To surf1.CountTriangles()-1
+					For Local t=0 Until surf1.CountTriangles()
 		
 						Local v0=surf1.TriangleVertex(t,0)+no_verts2
 						Local v1=surf1.TriangleVertex(t,1)+no_verts2
@@ -763,7 +763,7 @@ Type TMesh Extends TEntity
 			Next
 			
 			' add new surface
-			
+Rem simon			
 			If new_surf=True
 			
 				Local surf:TSurface=mesh2.CreateSurface()
@@ -809,21 +809,15 @@ Type TMesh Extends TEntity
 
 				Next
 				
-				' copy brush
-				
-				If surf1.brush<>Null
-				
-					surf.brush=surf1.brush.Copy()
-					
-				EndIf
+				surf.brush=surf1.brush
 				
 				' mesh shape has changed - update reset flags
 				surf.reset_vbo=-1 ' (-1 = all)
 			
 			EndIf
+EndRem		
 							
 		Next
-		
 		' mesh shape has changed - update reset flags
 		mesh2.reset_bounds=True
 		mesh2.col_tree.reset_col_tree=True
@@ -832,10 +826,10 @@ Type TMesh Extends TEntity
 	
 	Method FlipMesh()
 	
-		For Local surf:TSurface=EachIn surf_list
+		For Local surf:TMiniSurface=EachIn surf_list
 		
 			' flip triangle vertex order
-			For Local t=1 To surf.no_tris
+			For Local t=1 To surf.CountTriangles()
 			
 				Local i0=t*3-3
 				Local i1=t*3-2
@@ -870,24 +864,11 @@ Type TMesh Extends TEntity
 		
 	EndMethod
 	
-	Method PaintMesh(bru:TBrush)
+	Method PaintMesh(brush:TBrush)
 
-		For Local surf:TSurface=EachIn surf_list
-
-			If surf.brush=Null Then surf.brush=New TBrush
-			
-			surf.brush.no_texs=bru.no_texs
-			surf.brush.name$=bru.name$
-			surf.brush.red#=bru.red#
-			surf.brush.green#=bru.green#
-			surf.brush.blue#=bru.blue#
-			surf.brush.alpha#=bru.alpha#
-			surf.brush.shine#=bru.shine#
-			surf.brush.blend=bru.blend
-			surf.brush.fx=bru.fx
-			For Local i=0 To 7
-				surf.brush.tex[i]=bru.tex[i]
-			Next
+		For Local surf:TMiniSurface=EachIn surf_list
+		
+			surf.PaintSurface(brush)
 
 		Next
 
@@ -969,7 +950,7 @@ Type TMesh Extends TEntity
 		
 		For Local s=1 To CountSurfaces()
 			
-			Local surf:TSurface=GetSurface(s)
+			Local surf:TMiniSurface=TMiniSurface(GetSurface(s))
 				
 			For Local v=0 To surf.CountVertices()-1
 		
@@ -1024,10 +1005,10 @@ Type TMesh Extends TEntity
 	
 		For Local s=1 To no_surfs
 	
-			Local surf:TSurface=GetSurface(s)
+			Local surf:TMiniSurface=TMiniSurface(GetSurface(s))
 				
-			For Local v=0 To surf.no_verts-1
-		
+			For Local v=0 To surf.CountVertices()
+			
 				surf.vert_coords[v*3]:*sx#
 				surf.vert_coords[v*3+1]:*sy#
 				surf.vert_coords[v*3+2]:*sz#
@@ -1050,14 +1031,13 @@ Type TMesh Extends TEntity
 		pitch#=-pitch#
 		
 		Local mat:TMatrix=New TMatrix
-		mat.LoadIdentity()
-		mat.Rotate(pitch#,yaw#,roll#)
+		mat.LoadRotation(pitch#,yaw#,roll#)
 
 		For Local s=1 To no_surfs
 	
-			Local surf:TSurface=GetSurface(s)
+			Local surf:TMiniSurface=TMiniSurface(GetSurface(s))
 				
-			For Local v=0 To surf.no_verts-1
+			For Local v=0 Until surf.CountVertices()
 		
 				Local vx#=surf.vert_coords[v*3]
 				Local vy#=surf.vert_coords[v*3+1]
@@ -1094,9 +1074,9 @@ Type TMesh Extends TEntity
 	
 		For Local s=1 To no_surfs
 	
-			Local surf:TSurface=GetSurface(s)
+			Local surf:TMiniSurface=TMiniSurface(GetSurface(s))
 				
-			For Local v=0 To surf.no_verts-1
+			For Local v=0 Until surf.CountVertices()
 		
 				surf.vert_coords[v*3]:+px#
 				surf.vert_coords[v*3+1]:+py#
@@ -1119,7 +1099,7 @@ Type TMesh Extends TEntity
 
 		For Local s=1 To CountSurfaces()
 
-			Local surf:TSurface=GetSurface( s )
+			Local surf:TMiniSurface=TMiniSurface(GetSurface(s))
 			
 			'If USE_C
 				C_UpdateNormals(surf.no_tris,surf.no_verts,surf.tris,surf.vert_coords,surf.vert_norm)
@@ -1134,16 +1114,16 @@ Type TMesh Extends TEntity
 	
 	End Method
 	
-	Method CreateSurface:TSurface(bru:TBrush=Null)
+	Method CreateSurface:TSurface()
 	
-		Local surf:TSurface=New TSurface
+		Local surf:TMIniSurface=New TMiniSurface
 		ListAddLast surf_list,surf
 		
 		no_surfs=no_surfs+1
 		
-		If bru<>Null
-			surf.brush=bru.Copy()
-		EndIf
+'		If bru<>Null
+'			surf.brush=TMiniBrush(bru.Copy())
+'		EndIf
 
 		' new mesh surface - update reset flags
 		reset_bounds=True
@@ -1203,9 +1183,9 @@ Type TMesh Extends TEntity
 	
 		' ***note*** unlike B3D version, this will find a surface with no brush, if a null brush is supplied
 	
-		For Local surf:TSurface=EachIn surf_list
+		For Local surf:TMiniSurface=EachIn surf_list
 		
-			If TBrush.CompareBrushes(brush,surf.brush)=True
+			If brush=surf.brush
 				Return surf
 			EndIf
 		
@@ -1250,9 +1230,9 @@ Type TMesh Extends TEntity
 	End Method
 		
 	 ' used by CopyEntity
-	Function CopyBonesList(ent:TEntity,bones:TBone[] Var,no_bones Var)
+	Function CopyBonesList(ent:TMiniEntity,bones:TBone[] Var,no_bones Var)
 
-		For Local ent:TEntity=EachIn ent.child_list
+		For Local ent:TMiniEntity=EachIn ent.child_list
 			If TBone(ent)<>Null
 				no_bones=no_bones+1
 				bones=bones[..no_bones]
@@ -1285,9 +1265,9 @@ Type TMesh Extends TEntity
 	
 	' used by LoadMesh
 	' has to be function as we need to use this function with all entities and not just meshes
-	Function CollapseChildren:TMesh(ent0:TEntity,mesh:TMesh=Null)
+	Function CollapseChildren:TMesh(ent0:TMiniEntity,mesh:TMesh=Null)
 
-		For Local ent:TEntity=EachIn ent0.child_list
+		For Local ent:TMiniEntity=EachIn ent0.child_list
 			If TMesh(ent)<>Null
 				'Local new_mesh:TMesh=New TMesh 'TMesh(ent).CopyMesh() ' don't use copymesh, uses CreateMesh and adds to entity list
 				'TMesh(ent).AddMesh(new_mesh)
@@ -1308,9 +1288,9 @@ Type TMesh Extends TEntity
 
 		For Local s=1 To no_surfs
 	
-			Local surf:TSurface=GetSurface(s)
+			Local surf:TMiniSurface=TMiniSurface(GetSurface(s))
 				
-			For Local v=0 To surf.no_verts-1
+			For Local v=0 Until surf.CountVertices() 
 		
 				Local vx#=surf.vert_coords[v*3]
 				Local vy#=surf.vert_coords[v*3+1]
@@ -1350,9 +1330,9 @@ Type TMesh Extends TEntity
 			min_z#=999999999
 			max_z#=-999999999
 			
-			For Local surf:TSurface=EachIn surf_list
+			For Local surf:TMIniSurface=EachIn surf_list
 		
-				For Local v=0 Until surf.no_verts
+				For Local v=0 Until surf.CountVertices()
 				
 					Local x#=surf.vert_coords[v*3] ' surf.VertexX(v)
 					If x#<min_x# Then min_x#=x#
@@ -1426,7 +1406,7 @@ Type TMesh Extends TEntity
 		EndIf
 
 		' check surf brushes
-		For Local surf:TSurface=EachIn surf_list
+		For Local surf:TMiniSurface=EachIn surf_list
 		
 			surf.alpha_enable=False
 			
@@ -1483,21 +1463,21 @@ Type TMesh Extends TEntity
 		EndIf
 		
 		' convert surf lists into arrays, sort by alpha true/false (we need to draw surfaces with alpha last)
-		Local surfs:TSurface[]=TSurface[](ListToArray(surf_list))
+		Local surfs:TMiniSurface[]=TMiniSurface[](ListToArray(surf_list))
 		surfs.Sort
-		Local anim_surfs:TSurface[]=TSurface[](ListToArray(anim_surf_list))
+		Local anim_surfs:TMiniSurface[]=TMiniSurface[](ListToArray(anim_surf_list))
 		anim_surfs.Sort
 
-		Local anim_surf:TSurface
+		Local anim_surf:TMiniSurface
 		Local anim_surf_no=-1
 		
-		For Local surf:TSurface=EachIn surfs
+		For Local surf:TMiniSurface=EachIn surfs
 		
 			anim_surf_no=anim_surf_no+1
 	
 			Local vbo=False
 			If surf.no_tris>=VBO_MIN_TRIS
-				If TGlobal.vbo_enabled Then vbo=True
+				If TMiniB3DDriver.vbo_enabled Then vbo=True
 			Else
 				' if surf no longer has required no of tris then free vbo
 				If surf.vbo_id[0]<>0 
@@ -1596,9 +1576,9 @@ Type TMesh Extends TEntity
 				ambient_green#=1.0
 				ambient_blue# =1.0
 			Else
-				ambient_red#  =TGlobal.ambient_red#
-				ambient_green#=TGlobal.ambient_green#
-				ambient_blue# =TGlobal.ambient_blue#
+				ambient_red#  =TMiniB3DDriver.ambient_red#
+				ambient_green#=TMiniB3DDriver.ambient_green#
+				ambient_blue# =TMiniB3DDriver.ambient_blue#
 			EndIf
 
 			' fx flag 2 - vertex colors ***todo*** disable all lights?
@@ -1690,7 +1670,7 @@ Type TMesh Extends TEntity
 				If surf.brush.tex[ix]<>Null Or brush.tex[ix]<>Null
 
 					' Main brush texture takes precedent over surface brush texture
-					Local texture:TTexture,tex_flags,tex_blend,tex_coords,tex_u_scale#,tex_v_scale#,tex_u_pos#,tex_v_pos#,tex_ang#,tex_cube_mode,frame
+					Local texture:TMiniTexture,tex_flags,tex_blend,tex_coords,tex_u_scale#,tex_v_scale#,tex_u_pos#,tex_v_pos#,tex_ang#,tex_cube_mode,frame
 					If brush.tex[ix]<>Null
 						texture=brush.tex[ix]
 						tex_flags=brush.tex[ix].flags
@@ -1947,4 +1927,3 @@ Type TMesh Extends TEntity
 	End Method
 	
 End Type
-

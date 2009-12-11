@@ -15,19 +15,19 @@ Type TPick
 
 	Function CameraPick:TEntity(cam:TCamera,vx:Float,vy:Float)
 
-		vy:Float=TGlobal.height-vy
+		vy:Float=TMiniB3DDriver.height-vy
 
 		Local px:Double
 		Local py:Double
 		Local pz:Double
 
-        gluUnProject(vx,vy,0.0,cam.mod_mat,cam.proj_mat,cam.viewport,Varptr px,Varptr py,Varptr pz)
+        gluUnProject(vx,vy,0.0,cam.mod_mat,cam.proj_mat,cam.Viewport,Varptr px,Varptr py,Varptr pz)
 
 		Local x:Float=Float(px)
 		Local y:Float=Float(py)
 		Local z:Float=-Float(pz)
 		
-        gluUnProject(vx,vy,1.0,cam.mod_mat,cam.proj_mat,cam.viewport,Varptr px,Varptr py,Varptr pz)
+        gluUnProject(vx,vy,1.0,cam.mod_mat,cam.proj_mat,cam.Viewport,Varptr px,Varptr py,Varptr pz)
 
 		Local x2:Float=Float(px)
 		Local y2:Float=Float(py)
@@ -39,15 +39,15 @@ Type TPick
 
 	Function EntityPick:TEntity(ent:TEntity,range:Float)
 
-		TEntity.TFormPoint(0.0,0.0,0.0,ent,Null)
-		Local x:Float=TEntity.TFormedX()
-		Local y:Float=TEntity.TFormedY()
-		Local z:Float=TEntity.TFormedZ()
+		TFormPoint(0.0,0.0,0.0,ent,Null)
+		Local x:Float=TFormedX()
+		Local y:Float=TFormedY()
+		Local z:Float=TFormedZ()
 		
-		TEntity.TFormPoint(0.0,0.0,range:Float,ent,Null)
-		Local x2:Float=TEntity.TFormedX()
-		Local y2:Float=TEntity.TFormedY()
-		Local z2:Float=TEntity.TFormedZ()
+		TFormPoint(0.0,0.0,range:Float,ent,Null)
+		Local x2:Float=TFormedX()
+		Local y2:Float=TFormedY()
+		Local z2:Float=TFormedZ()
 		
 		Return Pick(x,y,z,x2,y2,z2)
 
@@ -181,7 +181,7 @@ Type TPick
 		
 		Local pick=False
 		
-		For Local ent:TEntity=EachIn ent_list
+		For Local ent:TMiniEntity=EachIn ent_list
 		
 			If ent.pick_mode=0 Or ent.Hidden()=True Then Continue
 						

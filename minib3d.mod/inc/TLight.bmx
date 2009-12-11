@@ -1,4 +1,4 @@
-Type TLight Extends TEntity
+Type TLight Extends TMiniEntity
 
 	Global light_no=0
 	Global no_lights=0
@@ -30,12 +30,12 @@ Type TLight Extends TEntity
 	
 	End Method
 
-	Method CopyEntity:TLight(parent_ent:TEntity=Null)
+	Method CopyEntity:TEntity(parent_ent:TEntity=Null)
 
 		' new light 
 		Local light:TLight=New TLight
 		
-		Clone(light,parent_ent)
+		Clone(light,TMiniEntity(parent_ent))
 
 		light.cull_radius#=cull_radius#
 		light.radius_x#=radius_x#
@@ -105,11 +105,11 @@ Type TLight Extends TEntity
 		EndIf
 	
 		ListAddLast(light_list,light)
-		light.AddParent(parent_ent:TEntity)
+		light.SetParent(parent_ent:TEntity)
 		light.EntityListAdd(entity_list)
 
 		' update matrix
-		light.UpdateMat()
+		light.Dirty()
 
 		Return light
 

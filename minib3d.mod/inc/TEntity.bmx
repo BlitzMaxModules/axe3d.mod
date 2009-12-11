@@ -10,11 +10,11 @@
 
 ' mat removed for optimal entity that extends matrix 
 
-Type TEntity Extends TMatrix
+Type TMiniEntity Extends TEntity
 
 	Global entity_list:TList=CreateList()
 	
-	Global entity_root:TEntity=CreatePivot()
+	Global entity_root:TPivot=TPivot.CreatePivot()
 
 	Global temp_mat:TMatrix=New TMatrix
 
@@ -24,12 +24,12 @@ Type TEntity Extends TMatrix
 
 	Field child_list:TList=CreateList()
 
-	Field parent:TEntity=entity_root
+	Field parent:TMiniEntity=entity_root
 
 ' local orientation scale and position in 4x4 land
 
 	Field cycle:Int
-	Field dirty:Int	
+	Field isdirty:Int	
 	Field needclean:Int 
 
 	Field global_mat:TMatrix=New TMatrix
@@ -41,12 +41,13 @@ Type TEntity Extends TMatrix
 	Field order,alpha_order#
 	Field auto_fade,fade_near#,fade_far#,fade_alpha#
 
-	Field brush:TBrush=New TBrush
+	Field brush:TMiniBrush=New TMiniBrush
 	
 	Field cull_radius#
 	
 	Field radius_x#=1.0,radius_y#=1.0
 	Field box_x#=-1.0,box_y#=-1.0,box_z#=-1.0,box_w#=2.0,box_h#=2.0,box_d#=2.0
+
 	Field collision_type
 	Field no_collisions,collision:TCollisionImpact[]
 	Field pick_mode,obscurer
@@ -77,10 +78,10 @@ Type TEntity Extends TMatrix
 
 ' private helpers
 
-	Method UpdateMat()
-		Local p:TEntity
+	Method Dirty()
+		Local p:TMiniEntity
 		Assert Self<>entity_root
-		dirty=True
+		isdirty=True
 		p=Self
 		While p
 			p.needclean=True
@@ -89,64 +90,62 @@ Type TEntity Extends TMatrix
 	End Method
 	
 	Method TransformEntity()
-		Local ent:TEntity
-		If True'dirty Or needclean
+		Local ent:TMiniEntity
+		If True'usdirty Or needclean
 			cycle=cycle+1
 			If(cycle=6) cycle=0
 			global_inv_mat.Invert(global_mat)
 			For ent= EachIn child_list			
 '				ent.freshen(cycle)
 				ent.local2global(global_mat,ent.global_mat)				
-				ent.dirty=True
+				ent.isdirty=True
 			Next		
 		EndIf
-		If dirty Or needclean
+		If isdirty Or needclean
 			For ent= EachIn child_list
 				ent.TransformEntity
 			Next
-			dirty=False
+			isdirty=False
 			needclean=False
 		EndIf
 	End Method
 
-	Method AddParent(parent_ent:TEntity,glob=True)
+	Method SetParent(parent_ent:TEntity,glob=True)
 		If parent_ent=Null
 			parent_ent=entity_root
 		EndIf
 		If parent
 			ListRemove(parent.child_list,Self)
 		EndIf
-		parent=parent_ent						
+		parent=TMiniEntity(parent_ent)	
 		Overwrite(global_mat)		
 		If parent	'static root means entity_root above is null
 			ListAddLast(parent.child_list,Self)						
 'simon			Multiply(parent.global_inv_mat)
 		EndIf			
-		UpdateMat()
+		Dirty()
 	End Method
 		
-	Method GetParent:TEntity()	
+	Method GetParent:TMiniEntity()	
 		If parent=entity_root
 			Return Null
 		EndIf
 		Return parent
 	End Method
 
-	Method CopyEntity:TEntity(parent_ent:TEntity=Null) Abstract
-
-	Method Clone(cam:TEntity,parent_ent:TEntity)
+	Method Clone(cam:TMiniEntity,parent_ent:TMiniEntity)
 
 		' copy contents of child list before adding parent
 
-		For Local ent:TEntity=EachIn child_list
+		For Local ent:TMiniEntity=EachIn child_list
 			ent.CopyEntity(cam)
 		Next
 		
 		' lists
 		
 		' add parent, add to list
-		cam.AddParent(parent_ent)
-		cam.EntityListAdd(entity_list)
+		cam.SetParent(parent_ent)
+'		cam.EntityListAdd(entity_list)
 		
 		' add to collision entity list
 		If collision_type<>0
@@ -158,12 +157,7 @@ Type TEntity Extends TMatrix
 			TPick.ent_list.AddLast(cam)
 		EndIf
 		
-		' update matrix
-		If cam.parent<>Null
-			cam.Overwrite(cam.parent)
-		Else
-			cam.LoadIdentity()
-		EndIf
+		Dirty()		
 		
 		cam.name$=name$
 		cam.class$=class$
@@ -179,7 +173,7 @@ Type TEntity Extends TMatrix
 			DebugLog "New TEntity"
 		EndIf
 		
-		self.ScaleEntity 1,1,1
+		Self.ScaleEntity 1,1,1
 	
 	End Method
 	
@@ -203,7 +197,7 @@ Type TEntity Extends TMatrix
 		' remove from pick entity list
 		If pick_mode<>0 ListRemove(TPick.ent_list,Self)
 		
-		Local ent:TEntity
+		Local ent:TMiniEntity
 		
 		' free self from parent's child_list
 		If parent<>Null
@@ -234,14 +228,14 @@ Type TEntity Extends TMatrix
 		grid[3,0]=x
 		grid[3,1]=y
 		grid[3,2]=z
-		UpdateMat()		
+		Dirty()		
 	End Method
 		
 	Method MoveEntity(mx#,my#,mz#)
 		grid[3,0]:+mx
 		grid[3,1]:+my
 		grid[3,2]:-mz
-		UpdateMat()
+		Dirty()
 	End Method
 
 	Method TranslateEntity(tx#,ty#,tz#,glob=False)
@@ -253,30 +247,33 @@ Type TEntity Extends TMatrix
 		grid[3,0]:+tx
 		grid[3,1]:+ty
 		grid[3,2]:+tz
-		UpdateMat()
+		Dirty()
 	End Method
 	
 	Method ScaleEntity(x#,y#,z#,glob=False)
 		grid[0,3]=x
 		grid[1,3]=y
 		grid[2,3]=z
-		UpdateMat()
+		Dirty()
 	End Method
 
 	Method RotateEntity(x#,y#,z#,glob=False)	
 		If glob
 			OverWrite global_mat
-			JustRot x,y,z
+			LoadRotation x,y,z
 			Multiply parent.global_inv_mat
 		Else
-			JustRot(x,y,z)
+			LoadRotation x,y,z
 		EndIf
 	End Method
 		
 	Method TurnEntity(x#,y#,z#,glob=False)
-		temp_mat.FromRot(x,y,z)
+		temp_mat.LoadRotation(x,y,z)
 		Multiply(temp_mat)
-		UpdateMat()
+		Dirty()
+	End Method
+
+	Method AlignToVector(vector_x#,vector_y#,vector_z#,axis,rate#=1.0)
 	End Method
 
 	' Function by mongia2
@@ -331,7 +328,7 @@ Type TEntity Extends TMatrix
 			For Local bone:TBone=EachIn TMesh(Self).bones
 			
 				' find bone in mesh that matches bone in self - search based on bone name
-				Local mesh_bone:TBone=TBone(TEntity(mesh).FindChild(bone.name$))
+				Local mesh_bone:TBone=TBone(TMiniEntity(mesh).FindChild(bone.EntityName()))
 			
 				If mesh_bone<>Null
 			
@@ -501,8 +498,11 @@ Type TEntity Extends TMatrix
 	
 	End Method
 
-	Method EntityTexture(texture:TTexture,frame=0,index=0)
+	Method EntityTexture(itexture:TTexture,frame=0,index=0)
 
+		Local texture:TMiniTexture
+		texture=TMiniTexture(itexture)
+		
 		brush.tex[index]=texture
 		If index+1>brush.no_texs Then brush.no_texs=index+1
 		
@@ -519,7 +519,7 @@ Type TEntity Extends TMatrix
 		If TMesh(Self)<>Null
 		
 			' overwrite surface blend modes with master blend mode
-			For Local surf:TSurface=EachIn TMesh(Self).surf_list
+			For Local surf:TMiniSurface=EachIn TMesh(Self).surf_list
 				If surf.brush<>Null
 					surf.brush.blend=brush.blend
 				EndIf
@@ -543,7 +543,10 @@ Type TEntity Extends TMatrix
 	
 	End Method
 	
-	Method PaintEntity(bru:TBrush)
+	Method PaintEntity(ibrush:TBrush)
+	
+		Local bru:TMiniBrush
+		bru=TMiniBrush(ibrush)
 	
 		brush.no_texs=bru.no_texs
 		brush.name$=bru.name$
@@ -558,6 +561,10 @@ Type TEntity Extends TMatrix
 			brush.tex[i]=bru.tex[i]
 		Next
 	
+	End Method
+	
+	Method GetEntityBrush:TBrush()
+		Return brush
 	End Method
 	
 	Method EntityOrder(order_no)
@@ -587,7 +594,7 @@ Type TEntity Extends TMatrix
 	
 		If hide=True Return True
 		
-		Local ent:TEntity=parent
+		Local ent:TMiniEntity=parent
 		While ent<>Null
 			If ent.hide=True Return True
 			ent=ent.parent
@@ -708,7 +715,7 @@ Type TEntity Extends TMatrix
 
 		Local no_children=0
 		
-		For Local ent:TEntity=EachIn child_list
+		For Local ent:TMiniEntity=EachIn child_list
 
 			no_children=no_children+1
 
@@ -722,7 +729,7 @@ Type TEntity Extends TMatrix
 	
 		Local no_children=0
 		
-		For Local ent:TEntity=EachIn child_list
+		For Local ent:TMiniEntity=EachIn child_list
 
 			no_children=no_children+1
 			If no_children=child_no Return ent
@@ -737,7 +744,7 @@ Type TEntity Extends TMatrix
 	
 		Local cent:TEntity
 	
-		For Local ent:TEntity=EachIn child_list
+		For Local ent:TMiniEntity=EachIn child_list
 
 			If ent.EntityName$()=child_name$ Return ent
 
@@ -754,27 +761,27 @@ Type TEntity Extends TMatrix
 	' Calls function in TPick
 	Method EntityPick:TEntity(range#)
 	
-		Return TPick.EntityPick:TEntity(Self,range#)
+		Return TPick.EntityPick(Self,range#)
 	
 	End Method
 	
 	' Calls function in TPick
 	Method LinePick:TEntity(x#,y#,z#,dx#,dy#,dz#,radius#=0.0)
 	
-		Return TPick.LinePick:TEntity(x#,y#,z#,dx#,dy#,dz#,radius#=0.0)
+		Return TPick.LinePick(x#,y#,z#,dx#,dy#,dz#,radius#=0.0)
 	
 	End Method
 	
 	' Calls function in TPick
 	Method EntityVisible(src_entity:TEntity,dest_entity:TEntity)
 	
-		Return TPick.EntityVisible(src_entity,dest_entity)
+		Return TPick.EntityVisible(TMiniEntity(src_entity),TMiniEntity(dest_entity))
 	
 	End Method
 	
 	Method EntityDistance#(ent2:TEntity)
 
-		Return Sqr(Self.EntityDistanceSquared#(ent2))
+		Return Sqr(EntityDistanceSquared#(ent2))
 
 	End Method
 	
@@ -800,8 +807,14 @@ Type TEntity Extends TMatrix
 	
 	End Method
 	
-	Function TFormPoint(x#,y#,z#,src_ent:TEntity,dest_ent:TEntity)
+	Function TFormPoint(x#,y#,z#,isrc_ent:TEntity,idest_ent:TEntity)
 	
+		Local src_ent:TMiniEntity
+		Local dest_ent:TMiniEntity
+	
+		src_ent=TMiniEntity(isrc_ent)
+		dest_ent=TMiniEntity(idest_ent)
+
 		entity_root.TransformEntity()
 	
 		If src_ent And src_ent.parent
@@ -818,9 +831,13 @@ Type TEntity Extends TMatrix
 		
 	End Function
 
-	Function TFormVector(x#,y#,z#,src_ent:TEntity,dest_ent:TEntity)
+	Function TFormVector(x#,y#,z#,isrc_ent:TEntity,idest_ent:TEntity)
 	
-		entity_root.TransformEntity()
+		Local src_ent:TMiniEntity
+		Local dest_ent:TMiniEntity
+	
+		src_ent=TMiniEntity(isrc_ent)
+		dest_ent=TMiniEntity(idest_ent)
 	
 		If src_ent.parent
 			src_ent.parent.global_mat.TransformVector(x,y,z)
@@ -835,12 +852,18 @@ Type TEntity Extends TMatrix
 		tformed_z#=z#
 	
 	End Function
+	
+	Function TFormNormal(x#,y#,z#,isrc_ent:TEntity,idest_ent:TEntity)
 
-	Function TFormNormal(x#,y#,z#,src_ent:TEntity,dest_ent:TEntity)
+		Local src_ent:TMiniEntity
+		Local dest_ent:TMiniEntity
+	
+		src_ent=TMiniEntity(isrc_ent)
+		dest_ent=TMiniEntity(idest_ent)
 
 		entity_root.TransformEntity()
 
-		TEntity.TFormVector(x#,y#,z#,src_ent,dest_ent)
+		TFormVector(x#,y#,z#,src_ent,dest_ent)
 		
 		Local uv#=Sqr((tformed_x#*tformed_x#)+(tformed_y#*tformed_y#)+(tformed_z#*tformed_z#))
 		
@@ -928,7 +951,7 @@ Type TEntity Extends TMatrix
 	
 		If recursive=True
 		
-			For Local ent:TEntity=EachIn child_list
+			For Local ent:TMiniEntity=EachIn child_list
 			
 				ent.EntityType(type_no,True)
 			
@@ -959,11 +982,11 @@ Type TEntity Extends TMatrix
 
 		' if self is source entity and type_no is dest entity
 		For Local i=1 To CountCollisions()
-			If CollisionEntity(i).collision_type=type_no Then Return CollisionEntity(i)
+			If CollisionEntity(i).GetEntityType()=type_no Then Return CollisionEntity(i)
 		Next
 
 		' if self is dest entity and type_no is src entity
-		For Local ent:TEntity=EachIn TCollisionPair.ent_lists[type_no]
+		For Local ent:TMiniEntity=EachIn TCollisionPair.ent_lists[type_no]
 			For Local i=1 To ent.CountCollisions()
 				If CollisionEntity(i)=Self Then Return ent		
 			Next
@@ -1095,32 +1118,38 @@ Type TEntity Extends TMatrix
 	End Method
 	
 	Method EntityScaleX#(glob=False)
-	
-		If glob
-			Return global_mat.grid[0,3]
-		Else
-			Return grid[0,3]
+		Return 1
+		Local s#
+		Local p:TEntity
+		s=grid[0,3]
+		If glob And parent
+			Return s*parent.EntityScaleX(True)
 		EndIf
-		
+		Return s		
 	End Method
 	
 	Method EntityScaleY#(glob=False)
-	
-		If glob
-			Return global_mat.grid[1,3]
-		Else
-			Return grid[1,3]
+		Return 1
+		Local s#
+		Local p:TEntity
+		s=grid[1,3]
+		If glob And parent
+			Return s*parent.EntityScaleY(True)
 		EndIf
+		Return s		
 		
 	End Method
 	
 	Method EntityScaleZ#(glob=False)
+		Return 1
 	
-		If glob
-			Return global_mat.grid[2,3]
-		Else
-			Return grid[2,3]
+		Local s#
+		Local p:TEntity
+		s=grid[2,3]
+		If glob And parent
+			Return s*parent.EntityScaleZ(True)
 		EndIf
+		Return s		
 		
 	End Method
 
@@ -1222,24 +1251,27 @@ Type TEntity Extends TMatrix
 		sr=radius
 
 	End Method
-	
-	Function CountAllChildren(ent:TEntity,no_children=0)
+Rem	
+	Function CountAllChildren(ent:TMiniEntity,no_children=0)
 		
-		Local ent2:TEntity
+		Local ent2:TMiniEntity
 	
 		For ent2=EachIn ent.child_list
 
 			no_children=no_children+1
 			
-			no_children=TEntity.CountAllChildren(ent2,no_children)
+			no_children=ent2.CountAllChildren(no_children)
 
 		Next
 
 		Return no_children
 
 	End Function
-	
-	Method GetChildFromAll:TEntity(child_no,no_children Var,ent:TEntity=Null)
+
+	Method GetChildFromAll:TMiniEntity(child_no,no_children Var,ient:TEntity=Null)
+		Local ent:TMiniEntity
+		
+		ent=TMiniEntity(ient)
 
 		If ent=Null Then ent=Self
 		
@@ -1261,8 +1293,8 @@ Type TEntity Extends TMatrix
 
 		Return ent3
 			
-	End Method
-	
+	End Method	
+EndRem	
 		
 	' unoptimised, unused
 	Method EntityDistanceSquared0#(ent2:TEntity)
@@ -1304,7 +1336,7 @@ Type TEntity Extends TMatrix
 			' it's own position within entities with order>0
 			Repeat
 				llink=llink._succ
-			Until llink=list._head Or TEntity(llink.Value()).order<=order Or TEntity(llink.Value()).order<=0
+			Until llink=list._head Or TMiniEntity(llink.Value()).order<=order Or TMiniEntity(llink.Value()).order<=0
 	
 			link=list.InsertBeforeLink(Self,llink)
 			Return
@@ -1320,13 +1352,13 @@ Type TEntity Extends TMatrix
 			' it's own position within entities with order<0
 			Repeat
 				llink=llink._pred
-			Until llink=list._head Or TEntity(llink.Value()).order>=order Or TEntity(llink.Value()).order>=0
+			Until llink=list._head Or TMiniEntity(llink.Value()).order>=order Or TMiniEntity(llink.Value()).order>=0
 	
 			link=list.InsertAfterLink(Self,llink)
 			Return
 
 		EndIf
 
-	End Method
-	
+	End Method	
+
 End Type

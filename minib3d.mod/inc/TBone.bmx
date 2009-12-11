@@ -1,4 +1,4 @@
-Type TBone Extends TEntity
+Type TBone Extends TMiniEntity
 
 	Field n_px#,n_py#,n_pz#,n_sx#,n_sy#,n_sz#,n_rx#,n_ry#,n_rz#,n_qw#,n_qx#,n_qy#,n_qz#
 
@@ -27,12 +27,12 @@ Type TBone Extends TEntity
 	
 	End Method
 	
-	Method CopyEntity:TBone(parent_ent:TEntity=Null)
+	Method CopyEntity:TEntity(parent_ent:TEntity=Null)
 	
 		' new bone
 		Local bone:TBone=New TBone
 		
-		Clone(bone,parent_ent)
+		Clone(bone,TMiniEntity(parent_ent))
 		' copy bone info
 		
 		bone.n_px#=n_px#
@@ -77,11 +77,11 @@ Type TBone Extends TEntity
 
 	' Same as UpdateChildren in TEntity except it negates z value of bone matrices so that children are transformed
 	' in correct z direction
-	Function UpdateBoneChildren(ent_p:TEntity)
+	Function UpdateBoneChildren(ent_p:TMiniEntity)
 		'skid
 		Assert False
 		Return
-		For Local ent_c:TEntity=EachIn ent_p.child_list
+		For Local ent_c:TMiniEntity=EachIn ent_p.child_list
 			
 			If TBone(ent_c)=Null ' if child is not a bone
 						
@@ -94,7 +94,7 @@ Type TBone Extends TEntity
 				EndIf
 			
 				ent_c.Overwrite(mat)
-				ent_c.UpdateMat()
+				ent_c.Dirty()
 				
 			EndIf
 			

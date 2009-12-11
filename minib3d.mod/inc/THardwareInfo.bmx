@@ -66,7 +66,7 @@ Type THardwareInfo
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, Varptr(THardwareInfo.MaxTexSize))
 		glGetIntegerv(GL_MAX_LIGHTS, Varptr(THardwareInfo.MaxLights))
 	End Function
-
+Rem simon
 	Function DisplayInfo(LogFile:Int=False)
 		Local position:Int, Space:Int, stream:TStream
 
@@ -128,4 +128,7 @@ Type THardwareInfo
 			Print("- Ready -")
 		EndIf
 	End Function
+
+EndRem
+
 End Type

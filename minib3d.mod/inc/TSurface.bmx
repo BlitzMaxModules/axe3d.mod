@@ -1,4 +1,4 @@
-Type TSurface
+Type TMiniSurface Extends TSurface
 
 	' no of vertices and triangles in surface
 
@@ -27,7 +27,7 @@ Type TSurface
 
 	' brush applied to surface
 
-	Field brush:TBrush=New TBrush
+	Field brush:TMiniBrush=New TMiniBrush
 	
 	' vbo
 	
@@ -63,14 +63,18 @@ Type TSurface
 		EndIf
 			
 	End Method
+	
+	Method GetSurfaceBrush:TBrush()
+		Return brush
+	End Method
 
 	' used to sort surfaces into alpha order. used by TMesh.Update
 	Method Compare(other:Object)
 	
-		If TSurface(other)
+		If TMiniSurface(other)
 		
-			If alpha_enable>TSurface(other).alpha_enable Then Return 1
-			If alpha_enable<TSurface(other).alpha_enable Then Return -1
+			If alpha_enable>TMiniSurface(other).alpha_enable Then Return 1
+			If alpha_enable<TMiniSurface(other).alpha_enable Then Return -1
 	
 		EndIf
 		
@@ -80,7 +84,7 @@ Type TSurface
 						
 	Method Copy:TSurface()
 	
-		Local surf:TSurface=New TSurface
+		Local surf:TMiniSurface=New TMiniSurface
 		
 		surf.no_verts=no_verts
 		surf.no_tris=no_tris
@@ -102,7 +106,7 @@ Type TSurface
 		surf.vert_weight4=vert_weight4[..]
 		
 		If brush<>Null
-			surf.brush=brush.Copy()
+			surf.brush=TMiniBrush(brush.Copy())
 		EndIf
 
 		surf.vert_array_size=vert_array_size
@@ -116,9 +120,11 @@ Type TSurface
 	
 	End Method
 	
-	Method PaintSurface(bru:TBrush)
+	Method PaintSurface(red:TBrush)
+	
+		Local bru:TMiniBrush=TMiniBrush(red)
 
-		If brush=Null Then brush=New TBrush
+		If brush=Null Then brush=New TMiniBrush
 		
 		brush.no_texs=bru.no_texs
 		brush.name$=bru.name$
@@ -612,18 +618,18 @@ Type TSurface
 	' removes a tri from a surface
 	Function RemoveTri(surf:TSurface,tri)
 	
-		Local no_tris=CountTriangles(surf)
+		Local no_tris=surf.CountTriangles()
 		Local tris[no_tris,3]
 		
 		For Local t=0 To no_tris-1
 	
-			tris[t,0]=TriangleVertex(surf,t,0)
-			tris[t,1]=TriangleVertex(surf,t,1)	
-			tris[t,2]=TriangleVertex(surf,t,2)		
+			tris[t,0]=surf.TriangleVertex(t,0)
+			tris[t,1]=surf.TriangleVertex(t,1)	
+			tris[t,2]=surf.TriangleVertex(t,2)		
 				
 		Next
 		
-		ClearSurface surf,False,True
+		surf.ClearSurface False,True
 	
 		For Local t=0 To no_tris-1
 	
@@ -631,7 +637,7 @@ Type TSurface
 			Local v1=tris[t,1]
 			Local v2=tris[t,2]
 		
-			If t<>tri Then AddTriangle(surf,v0,v1,v2)
+			If t<>tri Then surf.AddTriangle(v0,v1,v2)
 			
 		Next
 		
@@ -640,10 +646,10 @@ Type TSurface
 	' removes redundent verts (non-working)
 	Function RemoveVerts(surf:TSurface)
 	
-		Local no_tris=CountTriangles(surf)
+		Local no_tris=surf.CountTriangles()
 		Local tris[no_tris,3]
 		
-		Local no_verts=CountVertices(surf)
+		Local no_verts=surf.CountVertices()
 		
 		Local vert_used[no_verts]
 		Local vert_info:Float[no_verts,15]
@@ -653,41 +659,41 @@ Type TSurface
 	
 			For Local i=0 To 2
 	
-				tris[t,i]=TriangleVertex(surf,t,i)
+				tris[t,i]=surf.TriangleVertex(t,i)
 				
 				vert_used[tris[t,i]]=True
 			
-				vert_info[tris[t,i],0]=VertexX(surf,i)
-				vert_info[tris[t,i],1]=VertexY(surf,i)
-				vert_info[tris[t,i],2]=VertexZ(surf,i)
-				vert_info[tris[t,i],3]=VertexNX(surf,i)
-				vert_info[tris[t,i],4]=VertexNY(surf,i)
-				vert_info[tris[t,i],5]=VertexNZ(surf,i)
-				vert_info[tris[t,i],6]=VertexRed(surf,i)
-				vert_info[tris[t,i],7]=VertexGreen(surf,i)
-				vert_info[tris[t,i],8]=VertexBlue(surf,i)
-				vert_info[tris[t,i],9]=VertexU(surf,i,0)
-				vert_info[tris[t,i],10]=VertexV(surf,i,0)
-				vert_info[tris[t,i],11]=VertexW(surf,i,0)
-				vert_info[tris[t,i],12]=VertexU(surf,i,1)
-				vert_info[tris[t,i],13]=VertexV(surf,i,1)
-				vert_info[tris[t,i],14]=VertexW(surf,i,1)
+				vert_info[tris[t,i],0]=surf.VertexX(i)
+				vert_info[tris[t,i],1]=surf.VertexY(i)
+				vert_info[tris[t,i],2]=surf.VertexZ(i)
+				vert_info[tris[t,i],3]=surf.VertexNX(i)
+				vert_info[tris[t,i],4]=surf.VertexNY(i)
+				vert_info[tris[t,i],5]=surf.VertexNZ(i)
+				vert_info[tris[t,i],6]=surf.VertexRed(i)
+				vert_info[tris[t,i],7]=surf.VertexGreen(i)
+				vert_info[tris[t,i],8]=surf.VertexBlue(i)
+				vert_info[tris[t,i],9]=surf.VertexU(i,0)
+				vert_info[tris[t,i],10]=surf.VertexV(i,0)
+				vert_info[tris[t,i],11]=surf.VertexW(i,0)
+				vert_info[tris[t,i],12]=surf.VertexU(i,1)
+				vert_info[tris[t,i],13]=surf.VertexV(i,1)
+				vert_info[tris[t,i],14]=surf.VertexW(i,1)
 					
 			Next
 					
 		Next
 		
-		ClearSurface surf,True,True
+		surf.ClearSurface True,True
 	
 		For Local v=0 To no_verts-1
 		
 			If vert_used[v]=True
 		
-				Local new_index=AddVertex(surf,vert_info[v,0],vert_info[v,1],vert_info[v,2])
-				VertexNormal surf,new_index,vert_info[v,3],vert_info[v,4],vert_info[v,5]
-				VertexColor surf,new_index,vert_info[v,6],vert_info[v,7],vert_info[v,8]
-				VertexTexCoords surf,new_index,vert_info[v,9],vert_info[v,10],vert_info[v,11],0
-				VertexTexCoords surf,new_index,vert_info[v,12],vert_info[v,13],vert_info[v,14],1
+				Local new_index=surf.AddVertex(vert_info[v,0],vert_info[v,1],vert_info[v,2])
+				surf.VertexNormal new_index,vert_info[v,3],vert_info[v,4],vert_info[v,5]
+				surf.VertexColor new_index,vert_info[v,6],vert_info[v,7],vert_info[v,8]
+				surf.VertexTexCoords new_index,vert_info[v,9],vert_info[v,10],vert_info[v,11],0
+				surf.VertexTexCoords new_index,vert_info[v,12],vert_info[v,13],vert_info[v,14],1
 				new_vert_index[v]=new_index
 		
 			EndIf
@@ -700,7 +706,7 @@ Type TSurface
 			Local v1=new_vert_index[tris[t,1]]
 			Local v2=new_vert_index[tris[t,2]]
 			
-			AddTriangle(surf,v0,v1,v2)
+			surf.AddTriangle(v0,v1,v2)
 			
 		Next
 		

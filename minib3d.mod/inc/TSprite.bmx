@@ -21,17 +21,17 @@ Type TSprite Extends TMesh
 	
 	End Method
 
-	Method CopyEntity:TSprite(parent_ent:TEntity=Null)
+	Method CopyEntity:TEntity(parent_ent:TEntity=Null)
 	
 		' new sprite
 		Local sprite:TSprite=New TSprite
 		
-		Clone(sprite,parent_ent)
+		Clone(sprite,TMiniEntity(parent_ent))
 		sprite.auto_fade=auto_fade
 		sprite.fade_near#=fade_near
 		sprite.fade_far#=fade_far
 		
-		sprite.brush=brush.Copy()
+		sprite.brush=TMiniBrush(brush.Copy())
 		
 		sprite.cull_radius#=cull_radius#
 		sprite.radius_x#=radius_x#
@@ -70,11 +70,11 @@ Type TSprite Extends TMesh
 		Local sprite:TSprite=New TSprite
 		sprite.class$="Sprite"
 		
-		sprite.AddParent(parent_ent:TEntity)
+		sprite.SetParent(parent_ent:TEntity)
 		sprite.EntityListAdd(entity_list)
 
 		' update matrix
-		sprite.UpdateMat()
+		sprite.Dirty()
 		
 		Local surf:TSurface=sprite.CreateSurface()
 		surf.AddVertex(-1,-1,0, 0, 1)
@@ -94,7 +94,7 @@ Type TSprite Extends TMesh
 
 		Local sprite:TSprite=CreateSprite(parent_ent)
 		
-		Local tex:TTexture=TTexture.LoadTexture(tex_file$,tex_flag)
+		Local tex:TTexture=TMiniTexture.LoadTexture(tex_file$,tex_flag)
 		sprite.EntityTexture(tex)
 		
 		' additive blend if sprite doesn't have alpha or masking flags set

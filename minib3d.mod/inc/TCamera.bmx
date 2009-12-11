@@ -1,4 +1,4 @@
-Type TCamera Extends TEntity
+Type TCamera Extends TMiniEntity
 
 	Global cam_list:TList=CreateList()
 
@@ -18,7 +18,7 @@ Type TCamera Extends TEntity
 	' used by CameraProject
 	Field mod_mat![16]
 	Field proj_mat![16]
-    Field viewport[4]
+    Field Viewport[4]
 	Global projected_x#
 	Global projected_y#
 	Global projected_z#
@@ -41,12 +41,12 @@ Type TCamera Extends TEntity
 	
 	End Method
 
-	Method CopyEntity:TCamera(parent_ent:TEntity=Null)
+	Method CopyEntity:TEntity(parent_ent:TEntity=Null)
 	
 		' new cam
 		Local cam:TCamera=New TCamera
 		
-		Clone(cam,parent_ent)
+		Clone(cam,TMiniEntity(parent_ent))
 		
 		cam.cull_radius#=cull_radius#
 		cam.radius_x#=radius_x#
@@ -98,16 +98,16 @@ Type TCamera Extends TEntity
 
 		Local cam:TCamera=New TCamera
 		
-		cam.CameraViewport(0,0,TGlobal.width,TGlobal.height)
+		cam.CameraViewport(0,0,TMiniB3DDriver.width,TMiniB3DDriver.height)
 		
 		cam.class$="Camera"
 		
-		cam.AddParent(parent_ent:TEntity)
+		cam.SetParent(parent_ent:TEntity)
 		cam.EntityListAdd(entity_list) ' add to entity list
 		cam.EntityListAdd(cam_list) ' add to cam list
 		
 		' update matrix
-		cam.UpdateMat()
+		cam.Dirty()
 
 		Return cam
 
@@ -116,7 +116,7 @@ Type TCamera Extends TEntity
 	Method CameraViewport(x,y,w,h)
 
 		vx=x
-		vy=TGlobal.height-h-y
+		vy=TMiniB3DDriver.height-h-y
 		vwidth=w
 		vheight=h
 
@@ -130,9 +130,9 @@ Type TCamera Extends TEntity
 
 	End Method
 	
-	Method CameraClsMode(color,zbuffer)
+	Method CameraClsMode(Color,zbuffer)
 
-		cls_color=color
+		cls_color=Color
 		cls_zbuffer=zbuffer
 	
 	End Method
@@ -190,7 +190,7 @@ Type TCamera Extends TEntity
 		Local py!
 		Local pz!
 
-        gluProject(x#,y#,-z#,mod_mat!,proj_mat!,viewport,Varptr px!,Varptr py!,Varptr pz!)
+		gluProject(x#,y#,-z#,mod_mat!,proj_mat!,Viewport,Varptr px!,Varptr py!,Varptr pz!)
 
 		projected_x#=-vx+Float(px!)
 		projected_y#=vy+vheight-Float(py!)
@@ -216,7 +216,7 @@ Type TCamera Extends TEntity
 	
 	End Method
 
-	Method EntityInView#(ent:TEntity)
+	Method EntityInView(ent:TEntity)
 
 		If TMesh(ent)<>Null
 
@@ -225,7 +225,7 @@ Type TCamera Extends TEntity
 
 		EndIf
 		
-		Return EntityInFrustum(ent)
+		Return EntityInFrustum(TMiniEntity(ent))
 		
 	End Method
 		
@@ -235,7 +235,7 @@ Type TCamera Extends TEntity
 		Local modl#[16]
 		Local clip#[16]
 		Local t#
-		
+				
 		' Get the current PROJECTION matrix from OpenGL
 		glGetFloatv( GL_PROJECTION_MATRIX, proj )
 		
@@ -343,11 +343,12 @@ Type TCamera Extends TEntity
 
 	End Method
 
-	Method EntityInFrustum#(ent:TEntity)
+	Method EntityInFrustum#(ent:TMiniEntity)
 	
 		Local x#=ent.EntityX#(True)
 		Local y#=ent.EntityY#(True)
 		Local z#=ent.EntityZ#(True)
+
 
 		Local radius#=Abs(ent.cull_radius#) ' use absolute value as cull_radius will be negative value if set by MeshCullRadius (manual cull)
 
@@ -363,15 +364,15 @@ Type TCamera Extends TEntity
 			z#=z#+(TMesh(ent).max_z-TMesh(ent).min_z)/2.0
 			
 			' transform mesh centre into world space
-			TEntity.TFormPoint x#,y#,z#,ent,Null
+			TFormPoint x#,y#,z#,ent,Null
 			x#=tformed_x
 			y#=tformed_y
 			z#=tformed_z
-			
+	
 			' radius - apply entity scale
-			Local rx#=radius#*ent.EntityScaleX(True)
-			Local ry#=radius#*ent.EntityScaleY(True)
-			Local rz#=radius#*ent.EntityScaleZ(True)
+			Local rx#=radius#'*ent.EntityScaleX(True)
+			Local ry#=radius#'*ent.EntityScaleY(True)
+			Local rz#=radius#'*ent.EntityScaleZ(True)
 			If rx#>=ry# And rx#>=rz#
 				radius#=Abs(rx#)
 			Else If ry#>=rx# And ry#>=rz#
@@ -469,6 +470,7 @@ Type TCamera Extends TEntity
 	End Rem
 
 	Method Update()
+		
 
 		' viewport
 		glViewport(vx,vy,vwidth,vheight)
@@ -503,9 +505,9 @@ Type TCamera Extends TEntity
 		EndIf
 
 		Local ratio#=(Float(vwidth)/vheight)
-		Local jx#=TGlobal.j[TGlobal.jitter,0]
-		Local jy#=TGlobal.j[TGlobal.jitter,1]
-		If TGlobal.aa=False Then jx#=0;jy#=0
+		Local jx#=TMiniB3DDriver.j[TMiniB3DDriver.jitter,0]
+		Local jy#=TMiniB3DDriver.j[TMiniB3DDriver.jitter,1]
+		If TMiniB3DDriver.aa=False Then jx#=0;jy#=0
 		
 		accPerspective(ATan((1.0/(zoom#*ratio#)))*2.0,ratio#,range_near#,range_far#,jx#,jy#,0.0,0.0,1.0)
 
@@ -515,7 +517,7 @@ Type TCamera Extends TEntity
 		' Get projection/model/viewport info - for use with CameraProject
 		glGetDoublev(GL_MODELVIEW_MATRIX,Varptr mod_mat[0])
 		glGetDoublev(GL_PROJECTION_MATRIX,Varptr proj_mat[0])
-		glGetIntegerv(GL_VIEWPORT,Varptr viewport[0])
+		glGetIntegerv(GL_VIEWPORT,Varptr Viewport[0])
 		
 		ExtractFrustum()
 	
@@ -537,15 +539,15 @@ Type TCamera Extends TEntity
 	End Method
 
 	Method accFrustum(left_#,right_#,bottom#,top#,zNear#,zFar#,pixdx#,pixdy#,eyedx#,eyedy#,focus#)
-	
+			
 		Local xwsize#,ywsize#
 		Local dx#,dy#
 		
 		xwsize=right_-left_
 		ywsize=top-bottom
-		dx=-(pixdx*xwsize/Float(viewport[2])+eyedx*zNear/focus)
-		dy=-(pixdy*ywsize/Float(viewport[3])+eyedy*zNear/focus)
-		
+		dx=-(pixdx*xwsize/Float(vwidth)+eyedx*zNear/focus)
+		dy=-(pixdy*ywsize/Float(vheight)+eyedy*zNear/focus)
+				
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		'Local ratio#=(Float(vwidth)/vheight)

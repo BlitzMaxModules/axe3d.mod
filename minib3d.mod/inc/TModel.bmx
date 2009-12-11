@@ -49,7 +49,7 @@ Type TModel
 	
 		' tex local vars
 		Local tex_no=0
-		Local tex:TTexture[1]
+		Local tex:TMiniTexture[1]
 		Local te_file$
 		Local te_flags
 		Local te_blend
@@ -62,7 +62,7 @@ Type TModel
 		
 		' brush local vars
 		Local brush_no
-		Local brush:TBrush[1]
+		Local brush:TMiniBrush[1]
 		Local b_no_texs
 		Local b_name$
 		Local b_red#
@@ -96,7 +96,7 @@ Type TModel
 	
 		' verts local vars
 		Local v_mesh:TMesh
-		Local v_surf:TSurface
+		Local v_surf:TMiniSurface
 		Local v_flags
 		Local v_tc_sets
 		Local v_tc_size
@@ -117,7 +117,7 @@ Type TModel
 		Local v_id
 		
 		' tris local vars
-		Local surf:TSurface
+		Local surf:TMiniSurface
 		Local tr_brush_id
 		Local tr_sz
 		Local tr_vid
@@ -231,10 +231,10 @@ Type TModel
 						Local cc
 						For Local levs=1 To node_level-2
 							cc=tent.CountChildren()
-							tent=tent.GetChild(cc)
+							tent=TEntity(tent.GetChild(cc))
 						Next
 						cc=tent.CountChildren()			
-						tent=tent.GetChild(cc)
+						tent=TEntity(tent.GetChild(cc))
 						parent_ent=tent
 						
 					EndIf
@@ -247,7 +247,7 @@ Type TModel
 				' output debug tree
 				Local tab$=""
 				Local info$=""
-				If tag$="NODE" And parent_ent<>Null Then info$=" (parent= "+parent_ent.name$+")"
+				If tag$="NODE" And parent_ent<>Null Then info$=" (parent= "+parent_ent.EntityName()+")"
 				For Local i=1 To node_level
 					tab$=tab$+"-"
 				Next
@@ -290,7 +290,7 @@ Type TModel
 						te_angle=te_angle*(180.0/Pi)
 	
 						' create texture object so we can set texture values (blend etc) before loading texture
-						tex[tex_no]=New TTexture
+						tex[tex_no]=New TMiniTexture
 	
 						' .flags and .file set in LoadTexture
 						tex[tex_no].blend=te_blend
@@ -304,10 +304,10 @@ Type TModel
 						' load texture, providing texture we created above as parameter.
 						' if a texture exists with all the same values as above (blend etc), the existing texture will be returned.
 						' if not then the texture created above (supplied as param below) will be returned
-						tex[tex_no]=TTexture.LoadTexture:TTexture(te_file$,te_flags,tex[tex_no])
+						tex[tex_no]=TMiniTexture.LoadTexture(te_file$,te_flags,tex[tex_no])
 											
 						tex_no=tex_no+1
-						tex=tex:TTexture[..tex_no+1] ' resize array +1
+						tex=tex[..tex_no+1] ' resize array +1
 	
 						new_tag$=ReadTag$(file)
 						
@@ -332,7 +332,7 @@ Type TModel
 						b_blend=ReadInt(file)
 						b_fx=ReadInt(file)
 						
-						brush[brush_no]=TBrush.CreateBrush:TBrush()
+						brush[brush_no]=TMiniBrush.CreateBrush()
 						brush[brush_no].no_texs=b_no_texs
 						brush[brush_no].name$=b_name$
 						brush[brush_no].red#=b_red#
@@ -356,7 +356,7 @@ Type TModel
 						Next
 		
 						brush_no=brush_no+1
-						brush=brush:TBrush[..brush_no+1] ' resize array +1
+						brush=brush[..brush_no+1] ' resize array +1
 						
 						new_tag$=ReadTag$(file)
 					
@@ -412,17 +412,17 @@ Rem skid
 								
 EndRem
 						'piv.UpdateMat(True)
-						piv.EntityListAdd(TEntity.entity_list)
+'						mesh.EntityListAdd(piv)
 						last_ent=piv
 			
 						' root ent?
 						If root_ent=Null Then root_ent=piv
 			
 						' if ent is root ent, and external parent specified, add parent
-						If root_ent=piv Then piv.AddParent(parent_ent_ext)
+						If root_ent=piv Then piv.SetParent(parent_ent_ext)
 			
 						' if ent nested then add parent
-						If node_level>0 Then piv.AddParent(parent_ent)
+						If node_level>0 Then piv.SetParent(parent_ent)
 						
 						TQuaternion.QuatToMat(-n_qw#,n_qx#,n_qy#,-n_qz#,piv)
 										
@@ -463,17 +463,17 @@ Rem skid
 					mesh.qz#=n_qz#
 End Rem
 					
-					mesh.EntityListAdd(TEntity.entity_list)
+'					mesh.EntityListAdd(TEntity.entity_list)
 					last_ent=mesh
 					
 					' root ent?
 					If root_ent=Null Then root_ent=mesh
 					
 					' if ent is root ent, and external parent specified, add parent
-					If root_ent=mesh Then mesh.AddParent(parent_ent_ext)
+					If root_ent=mesh Then mesh.SetParent(parent_ent_ext)
 					
 					' if ent nested then add parent
-					If node_level>0 Then mesh.AddParent(parent_ent)
+					If node_level>0 Then mesh.SetParent(parent_ent)
 	
 					TQuaternion.QuatToMat(-n_qw#,n_qx#,n_qy#,-n_qz#,mesh)
 									
@@ -495,7 +495,7 @@ End Rem
 					If v_surf<>Null Then v_surf=Null
 						
 					v_mesh=New TMesh
-					v_surf=v_mesh.CreateSurface()
+					v_surf=TMiniSurface(v_mesh.CreateSurface())
 					v_flags=ReadInt(file)
 					v_tc_sets=ReadInt(file)
 					v_tc_size=ReadInt(file)
@@ -554,7 +554,7 @@ End Rem
 						If prev_tag$="TRIS" Then TrimVerts(surf)
 					
 						' new surf - copy arrays
-						surf=mesh.CreateSurface()
+						surf=TMiniSurface(mesh.CreateSurface())
 						surf.vert_coords=v_surf.vert_coords[..]
 						surf.vert_col=v_surf.vert_col[..]
 						surf.vert_norm=v_surf.vert_norm[..]
@@ -590,8 +590,8 @@ End Rem
 	
 					Wend
 					
-					If m_brush_id<>-1 Then mesh.PaintEntity(brush:TBrush[m_brush_id])
-					If tr_brush_id<>-1 Then surf.PaintSurface(brush:TBrush[tr_brush_id])
+					If m_brush_id<>-1 Then mesh.PaintEntity(brush[m_brush_id])
+					If tr_brush_id<>-1 Then surf.PaintSurface(brush[tr_brush_id])
 					
 					If v_flags&1=0 And new_tag$<>"TRIS" Then mesh.UpdateNormals() ' if no normal data supplied and no further tri data then update normals
 	
@@ -613,9 +613,9 @@ End Rem
 						mesh.anim_seqs_last[0]=a_frames
 						
 						' create anim surfs, copy vertex coords array, add to anim_surf_list
-						For Local surf:TSurface=EachIn mesh.surf_list
+						For Local surf:TMiniSurface=EachIn mesh.surf_list
 						
-							Local anim_surf:TSurface=New TSurface
+							Local anim_surf:TMiniSurface=New TMiniSurface
 							ListAddLast(mesh.anim_surf_list,anim_surf)
 						
 							anim_surf.no_verts=surf.no_verts
@@ -655,8 +655,8 @@ End Rem
 						
 						' assign weight values, with the strongest weight in vert_weight[1], and weakest in vert_weight[4]
 							
-						Local anim_surf:TSurface			
-						For anim_surf:TSurface=EachIn mesh.anim_surf_list
+						Local anim_surf:TMiniSurface			
+						For anim_surf:TMiniSurface=EachIn mesh.anim_surf_list
 						
 							If bo_vert_id>=anim_surf.vmin And bo_vert_id<=anim_surf.vmax
 						
@@ -765,7 +765,7 @@ End Rem
 					If root_ent=Null Then root_ent=bo_bone
 					
 					' if ent nested then add parent
-					If node_level>0 Then bo_bone.AddParent(parent_ent)
+					If node_level>0 Then bo_bone.SetParent(parent_ent)
 					
 					TQuaternion.QuatToMat(-bo_bone.n_qw#,bo_bone.n_qx#,bo_bone.n_qy#,-bo_bone.n_qz#,bo_bone)
 					
@@ -782,7 +782,7 @@ End Rem
 					bo_bone.inv_mat=bo_bone.Inverse()
 				
 					If new_tag$<>"KEYS"
-						bo_bone.EntityListAdd(TEntity.entity_list)
+						bo_bone.EntityListAdd(TMiniEntity.entity_list)
 						mesh.bones=mesh.bones[..bo_no_bones]
 						mesh.bones[bo_no_bones-1]=bo_bone
 						last_ent=bo_bone
@@ -845,7 +845,7 @@ End Rem
 					
 						If bo_bone<>Null ' check if bo_bone exists - it won't for non-boned, keyframe anims
 					
-							bo_bone.EntityListAdd(TEntity.entity_list)
+							bo_bone.EntityListAdd(TMiniEntity.entity_list)
 							mesh.bones=mesh.bones[..bo_no_bones]
 							mesh.bones[bo_no_bones-1]=bo_bone
 							last_ent=bo_bone
@@ -872,7 +872,7 @@ End Rem
 
 	' Due to the .b3d format not being an exact fit with B3D, we need to slice vert arrays
 	' Otherwise we duplicate all vert information per surf
-	Function TrimVerts(surf:TSurface Var)
+	Function TrimVerts(surf:TMiniSurface Var)
 				
 		If surf.no_tris=0 Then Return ' surf has no tri info, do not trim
 				

@@ -428,9 +428,9 @@ EndRem
 		Local slink:TLink=TMesh(ent).surf_list.FirstLink() ' used to iterate through surf_list
 	
 		' cycle through all surfs
-		For Local anim_surf:TSurface=EachIn ent.anim_surf_list
+		For Local anim_surf:TMiniSurface=EachIn ent.anim_surf_list
 
-			Local surf:TSurface=TSurface(slink.Value:Object())
+			Local surf:TMiniSurface=TMiniSurface(slink.Value:Object())
 			
 			' mesh shape will be changed, update reset_vbo flag (1=vertices move)
 			anim_surf.reset_vbo:|1
@@ -521,7 +521,7 @@ EndRem
 	Function NormaliseWeights(mesh:TMesh)
 	
 		' cycle through all surfs
-		For Local anim_surf:TSurface=EachIn mesh.anim_surf_list
+		For Local anim_surf:TMiniSurface=EachIn mesh.anim_surf_list
 				
 			For Local vid=0 Until anim_surf.no_verts
 

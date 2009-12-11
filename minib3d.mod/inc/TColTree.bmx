@@ -45,10 +45,10 @@ Type TColTree
 		
 			For Local s=1 To mesh.CountSurfaces()
 			
-				Local surf:TSurface=mesh.GetSurface(s)
+				Local surf:TMiniSurface=TMiniSurface(mesh.GetSurface(s))
 				
-				Local no_tris=surf.no_tris
-				Local no_verts=surf.no_verts
+				Local no_tris=surf.CountTriangles()
+				Local no_verts=surf.CountVertices()
 				Local tris:Short[]=surf.tris[..]
 				Local verts:Float[]=surf.vert_coords[..]
 										

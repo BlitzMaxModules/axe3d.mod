@@ -1,6 +1,6 @@
 Type TBlitz2D
 
-	Function Text(x,y,text$)
+	Function Text(x,y,Text$)
 	
 		' set active texture to texture 0 so gldrawtext will work correctly
 		glActiveTextureARB(GL_TEXTURE0)
@@ -13,7 +13,7 @@ Type TBlitz2D
 		' enable blend to hide text background
 		glEnable(GL_BLEND)
 
-		GLDrawText text$,x,y
+		GLDrawText Text$,x,y
 		
 		glDisable(GL_BLEND)
 		
@@ -55,7 +55,7 @@ Type TBlitz2D
 		glMatrixMode GL_COLOR
 		glPushMatrix 
 		
-		TGlobal.EnableStates()
+		TMiniB3DDriver.EnableStates()
 		glDisable GL_TEXTURE_2D
 		
 		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR)

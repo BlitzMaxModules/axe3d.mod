@@ -47,7 +47,7 @@ Type TCollisionImpact
 	Field x#,y#,z#
 	Field nx#,ny#,nz#
 	Field time#
-	Field ent:TEntity
+	Field ent:TMiniEntity
 	Field surf:TSurface
 	Field tri
 
@@ -89,7 +89,7 @@ Function UpdateCollisions()
 		If TCollisionPair.ent_lists[i]=Null Then Continue
 
 		' loop through src entities
-		For Local ent:TEntity=EachIn TCollisionPair.ent_lists[i]
+		For Local ent:TMiniEntity=EachIn TCollisionPair.ent_lists[i]
 
 			ent.no_collisions=0
 			ent.collision=ent.collision[..0]
@@ -112,7 +112,7 @@ Function UpdateCollisions()
 	
 				c_coll=C_CreateCollisionObject()
 
-				Local ent2_hit:TEntity=Null
+				Local ent2_hit:TMiniEntity=Null
 				
 				For Local col_pair:TCollisionPair=EachIn TCollisionPair.list
 				
@@ -122,7 +122,7 @@ Function UpdateCollisions()
 						If TCollisionPair.ent_lists[col_pair.des_type]=Null Then Continue
 					
 						' loop through des entities that are paired with src entities
-						For Local ent2:TEntity=EachIn TCollisionPair.ent_lists[col_pair.des_type]
+						For Local ent2:TMiniEntity=EachIn TCollisionPair.ent_lists[col_pair.des_type]
 		
 							' if des entity is hidden or it's parent is hidden then do not check for collision
 							If ent2.Hidden()=True Then Continue
@@ -233,7 +233,7 @@ Function UpdateCollisions()
 End Function
 
 ' perform quick check to see whether it is possible that ent and ent 2 are intersecting
-Function QuickCheck(ent:TEntity,ent2:TEntity)
+Function QuickCheck(ent:TMiniEntity,ent2:TMiniEntity)
 
 	' check to see if src ent has moved since last update - if not, no intersection
 	If ent.old_x=ent.EntityX(True) And ent.old_y=ent.EntityY(True) And ent.old_z=ent.EntityZ(True)

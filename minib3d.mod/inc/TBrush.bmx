@@ -1,4 +1,4 @@
-Type TBrush
+Type TMiniBrush Extends TBrush
 
 	Field no_texs
 	Field name$
@@ -6,7 +6,7 @@ Type TBrush
 	Field shine#
 	Field blend,fx
 	Field tex_frame
-	Field tex:TTexture[8]
+	Field tex:TMiniTexture[8]
 
 	Method New()
 	
@@ -26,7 +26,7 @@ Type TBrush
 	
 	Method Copy:TBrush()
 		
-		Local brush:TBrush=New TBrush
+		Local brush:TMiniBrush=New TMiniBrush
 	
 		brush.no_texs=no_texs
 		brush.name$=name$
@@ -55,9 +55,9 @@ Type TBrush
 	
 	End Method
 		
-	Function CreateBrush:TBrush(r#=255.0,g#=255.0,b#=255.0)
+	Function CreateBrush:TMiniBrush(r#=255.0,g#=255.0,b#=255.0)
 	
-		Local brush:TBrush=New TBrush
+		Local brush:TMiniBrush=New TMiniBrush
 		brush.red#=r#/255.0
 		brush.green#=g#/255.0
 		brush.blue#=b#/255.0
@@ -68,8 +68,8 @@ Type TBrush
 	
 	Function LoadBrush:TBrush(file$,flags=1,u_scale#=1.0,v_scale#=1.0)
 	
-		Local brush:TBrush=New TBrush
-		brush.tex[0]=TTexture.LoadTexture:TTexture(file$,flags)
+		Local brush:TMiniBrush=New TMiniBrush
+		brush.tex[0]=TMiniTexture.LoadTexture(file$,flags)
 		brush.no_texs=1
 		'brush.tex[0].u_scale#=u_scale#
 		'brush.tex[0].v_scale#=v_scale#
@@ -100,7 +100,7 @@ Type TBrush
 	
 	Method BrushTexture(texture:TTexture,frame=0,index=0)
 	
-		tex[index]=texture
+		tex[index]=TMiniTexture(texture)
 		If index+1>no_texs Then no_texs=index+1
 		
 		If frame<0 Then frame=0
@@ -108,6 +108,10 @@ Type TBrush
 		tex_frame=frame
 	
 	End Method
+
+	Method GetBrushTexture:TTexture(index=0)
+		Return tex[index]
+	End method
 	
 	Method BrushBlend(blend_no)
 	
@@ -120,20 +124,14 @@ Type TBrush
 		fx=fx_no
 	
 	End Method
-	
-	Function GetEntityBrush:TBrush(ent:TEntity)
-	
-		Return ent.brush.Copy()
-		
-	End Function
-	
+
 	Function GetSurfaceBrush:TBrush(surf:TSurface)
 	
-		Return surf.brush.Copy()
+		Return TMiniSurface(surf).brush.Copy()
 
 	End Function
-	
-	Function CompareBrushes(brush1:TBrush,brush2:TBrush)
+
+	Function CompareBrushes(brush1:TMiniBrush,brush2:TMiniBrush)
 	
 		' returns true if specified brush1 has same properties as brush2
 

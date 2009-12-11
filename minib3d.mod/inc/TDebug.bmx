@@ -22,7 +22,7 @@ Type TDebug
 		Local no_sprites
 		Local no_bones
 		
-		For Local ent:TEntity=EachIn TEntity.entity_list
+		For Local ent:TMiniEntity=EachIn TEntity.entity_list
 		
 			no_ents:+1
 			
@@ -73,7 +73,7 @@ Type TDebug
 				If KeyHit(KEY_NUMMULTIPLY) Then surf_no:+1
 				If surf_no<1 Then surf_no=1
 				If surf_no>TMesh(cent).CountSurfaces() Then surf_no=TMesh(cent).CountSurfaces()
-				surf:TSurface=GetSurface(TMesh(cent),surf_no)
+				surf:TSurface=TMesh(cent).GetSurface(surf_no)
 			Else
 				surf_no=0
 				surf=Null

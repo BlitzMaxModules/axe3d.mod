@@ -35,6 +35,24 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "app.h"
 #include "modelutil.h"
 
+
+#ifndef USE_ASSIMP
+
+CModel *CModelUtil::ImportModel( const string &path,int collType,float mass ){
+	return 0;
+}
+CBody *CModelUtil::CreateModelBody( CModel *model,int collType,float mass ){
+//	CModelSurface *physSurf=new CModelSurface;
+//	for( vector<CModelSurface*>::const_iterator it=model->Surfaces().begin();it!=model->Surfaces().end();++it ){
+//		physSurf->AddSurface( *it );
+//	}
+//	CBody *body=App.World()->Physics()->CreateSurfaceBody( physSurf,collType,mass );
+//	physSurf->Release();
+	return 0;
+}
+
+#else
+
 #include <assimp.hpp>
 #include <aiScene.h>
 #include <aiPostProcess.h>
@@ -186,6 +204,8 @@ CModel *CModelUtil::ImportModel( const string &path,int collType,float mass ){
 
 	return model;
 }
+
+#endif
 
 CModel *CModelUtil::CreateSphere( CMaterial *material,float radius,int collType,float mass ){
 	int segs=8;
@@ -423,3 +443,4 @@ CModel *CModelUtil::CreateBox( CMaterial *material,float width,float height,floa
 	if( collType || mass ) model->SetBody( App.World()->Physics()->CreateBoxBody( width,height,depth,collType,mass ) );
 	return model;
 }
+

@@ -1,4 +1,7 @@
-Type TTexture
+ClearList TMiniTexture.tex_list
+
+
+Type TMiniTexture Extends TTexture
 
 	Global tex_list:TList=CreateList()
 
@@ -26,21 +29,19 @@ Type TTexture
 		EndIf
 	
 	End Method
-	
-	Method FreeTexture()
-	
-		ListRemove(tex_list,Self)
-		pixmap=Null
-		cube_pixmap=Null
-		gltex=Null
-	
+		
+	Method TextureBuffer:TPixmap(frame)
+		Return pixmap
 	End Method
-	
-	Function CreateTexture:TTexture(width,height,flags=1,frames=1,tex:TTexture=Null)
+
+	Function CreateTexture:TTexture(width,height,flags=1,frames=1,tex:TMiniTexture=Null)
 	
 		If flags&128 Then Return CreateCubeMapTexture(width,height,flags,tex)
 		
-		If tex=Null Then tex:TTexture=New TTexture ; ListAddLast(tex_list,tex)
+		If tex=Null
+			tex=New TMiniTexture 
+			ListAddLast(tex_list,tex)
+		EndIf
 		
 		tex.pixmap=CreatePixmap(width*frames,height,PF_RGBA8888)
 
@@ -101,17 +102,17 @@ Type TTexture
 
 	End Function
 
-	Function LoadTexture:TTexture(file$,flags=1,tex:TTexture=Null)
+	Function LoadTexture:TMiniTexture(file$,flags=1,tex:TMiniTexture=Null)
 	
-		Return LoadAnimTexture:TTexture(file$,flags,0,0,0,1,tex)
+		Return LoadAnimTexture(file$,flags,0,0,0,1,tex)
 	
 	End Function
 	
-	Function LoadAnimTexture:TTexture(file$,flags,frame_width,frame_height,first_frame,frame_count,tex:TTexture=Null)
+	Function LoadAnimTexture:TMiniTexture(file$,flags,frame_width,frame_height,first_frame,frame_count,tex:TMiniTexture=Null)
 
 		If flags&128 Then Return LoadCubeMapTexture(file$,flags,tex)
 	
-		If tex=Null Then tex:TTexture=New TTexture
+		If tex=Null Then tex:TMiniTexture=New TMiniTexture
 
 		If FileFind(file$)=False Then Return Null
 		
@@ -123,7 +124,7 @@ Type TTexture
 		tex.FilterFlags()
 		
 		' check to see if texture with same properties exists already, if so return existing texture
-		Local old_tex:TTexture
+		Local old_tex:TMiniTexture
 		old_tex=tex.TexInList()
 		If old_tex<>Null And old_tex<>tex
 			Return old_tex
@@ -229,9 +230,9 @@ Type TTexture
 		
 	End Function
 
-	Function CreateCubeMapTexture:TTexture(width,height,flags,tex:TTexture=Null)
+	Function CreateCubeMapTexture:TMiniTexture(width,height,flags,tex:TMiniTexture=Null)
 		
-		If tex=Null Then tex:TTexture=New TTexture ; ListAddLast(tex_list,tex)
+		If tex=Null Then tex:TMiniTexture=New TMiniTexture ; ListAddLast(tex_list,tex)
 		
 		tex.pixmap=CreatePixmap(width*6,height,PF_RGBA8888)
 		
@@ -296,9 +297,9 @@ Type TTexture
 		
 	End Function
 
-	Function LoadCubeMapTexture:TTexture(file$,flags=1,tex:TTexture=Null)
+	Function LoadCubeMapTexture:TMIniTexture(file$,flags=1,tex:TMiniTexture=Null)
 		
-		If tex=Null Then tex:TTexture=New TTexture
+		If tex=Null Then tex:TMiniTexture=New TMiniTexture
 		
 		If FileFind(file$)=False Then Return Null
 		
@@ -310,7 +311,7 @@ Type TTexture
 		tex.FilterFlags()
 		
 		' check to see if texture with same properties exists already, if so return existing texture
-		Local old_tex:TTexture
+		Local old_tex:TMiniTexture
 		old_tex=tex.TexInList()
 		If old_tex<>Null And old_tex<>tex
 			Return old_tex
@@ -400,6 +401,15 @@ Type TTexture
 
 	End Function
 
+	Method FreeTexture()
+	
+		ListRemove(tex_list,Self)
+		pixmap=Null
+		cube_pixmap=Null
+		gltex=Null
+	
+	End Method
+
 	Method TextureBlend(blend_no)
 		
 		blend=blend_no
@@ -450,7 +460,7 @@ Type TTexture
 	
 	End Method
 	
-	Function GetBrushTexture:TTexture(brush:TBrush,index=0)
+	Function GetBrushTexture:TTexture(brush:TMiniBrush,index=0)
 	
 		Return brush.tex[index]
 	
@@ -465,7 +475,7 @@ Type TTexture
 	Function TextureFilter(match_text$,flags)
 	
 		Local filter:TTextureFilter=New TTextureFilter
-		filter.text$=match_text$
+		filter.Text$=match_text$
 		filter.flags=flags
 		ListAddLast(TTextureFilter.filter_list,filter)
 	
@@ -486,20 +496,23 @@ Type TTexture
 			Local x=0,y=0
 	
 			glBindtexture GL_TEXTURE_2D,gltex[frame]
-			glCopyTexImage2D(GL_TEXTURE_2D,mipmap_no,GL_RGBA8,x,TGlobal.height-y-height,width,height,0)
+			y=TMiniB3DDriver.height-y-height
+			glCopyTexImage2D(GL_TEXTURE_2D,mipmap_no,GL_RGBA8,x,y,width,height,0)
 			
 		Else ' cubemap texture
 
 			Local x=0,y=0
+			
+			y=TMiniB3DDriver.height-y-height
 	
 			glBindtexture GL_TEXTURE_CUBE_MAP_EXT,gltex[0]
 			Select cube_face
-				Case 0 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,mipmap_no,GL_RGBA8,x,TGlobal.height-y-height,width,height,0)
-				Case 1 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,mipmap_no,GL_RGBA8,x,TGlobal.height-y-height,width,height,0)
-				Case 2 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,mipmap_no,GL_RGBA8,x,TGlobal.height-y-height,width,height,0)
-				Case 3 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,mipmap_no,GL_RGBA8,x,TGlobal.height-y-height,width,height,0)
-				Case 4 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,mipmap_no,GL_RGBA8,x,TGlobal.height-y-height,width,height,0)
-				Case 5 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,mipmap_no,GL_RGBA8,x,TGlobal.height-y-height,width,height,0)
+				Case 0 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,mipmap_no,GL_RGBA8,x,y,width,height,0)
+				Case 1 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,mipmap_no,GL_RGBA8,x,y,width,height,0)
+				Case 2 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,mipmap_no,GL_RGBA8,x,y,width,height,0)
+				Case 3 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,mipmap_no,GL_RGBA8,x,y,width,height,0)
+				Case 4 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,mipmap_no,GL_RGBA8,x,y,width,height,0)
+				Case 5 glCopyTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,mipmap_no,GL_RGBA8,x,y,width,height,0)
 			End Select
 		
 		EndIf
@@ -562,11 +575,11 @@ Type TTexture
 	
 	End Function
 		
-	Method TexInList:TTexture()
+	Method TexInList:TMiniTexture()
 
 		' check if tex already exists in list and if so return it
 
-		For Local tex:TTexture=EachIn tex_list
+		For Local tex:TMiniTexture=EachIn tex_list
 			If file$=tex.file$ And flags=tex.flags And blend=tex.blend
 				If u_scale#=tex.u_scale# And v_scale#=tex.v_scale# And u_pos#=tex.u_pos# And v_pos#=tex.v_pos# And angle#=tex.angle#
 					Return tex
@@ -582,7 +595,7 @@ Type TTexture
 	
 		' combine specifieds flag with texture filter flags
 		For Local filter:TTextureFilter=EachIn TTextureFilter.filter_list
-			If Instr(file$,filter.text$) Then flags=flags|filter.flags
+			If Instr(file$,filter.Text$) Then flags=flags|filter.flags
 		Next
 	
 	End Method
@@ -656,7 +669,7 @@ Type TTextureFilter
 
 	Global filter_list:TList=CreateList()
 
-	Field text$
+	Field Text$
 	Field flags
 	
 End Type

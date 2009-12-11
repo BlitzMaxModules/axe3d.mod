@@ -1,27 +1,17 @@
-Type TPivot Extends TEntity
+		
+Type TPivot Extends TMiniEntity
 
-	Method New()
-	
-		If LOG_NEW
-			DebugLog "New TPivot"
-		EndIf
-	
+	Method Update()
 	End Method
 	
-	Method Delete()
-	
-		If LOG_DEL
-			DebugLog "Del TPivot"
-		EndIf
-	
-	End Method
-
-	Method CopyEntity:TPivot(parent_ent:TEntity=Null)
+	Method CopyEntity:TEntity(parent_ent:axe3d.blitz3d.TEntity=Null)
 
 		' new piv
-		Local piv:TPivot=New TPivot
+		Local piv:TPivot
 		
-		Clone(piv,parent_ent)
+		piv=New TPivot
+		
+		Clone(piv,TMiniEntity(parent_ent))
 		
 		piv.cull_radius#=cull_radius#
 		piv.radius_x#=radius_x#
@@ -38,30 +28,20 @@ Type TPivot Extends TEntity
 		Return piv
 
 	End Method
-	
-	Method FreeEntity()
-	
-		Super.FreeEntity() 
-			
-	End Method
-	
+
 	Function CreatePivot:TPivot(parent_ent:TEntity=Null)
 
 		Local piv:TPivot=New TPivot
 		piv.class$="Pivot"
 		
-		piv.AddParent(parent_ent:TEntity)
+		piv.SetParent(parent_ent)
 		piv.EntityListAdd(entity_list)
 
 		' update matrix
-		piv.UpdateMat()
+		piv.Dirty()
 
 		Return piv
 
 	End Function
 		
-	Method Update()
-
-	End Method
-
 End Type
