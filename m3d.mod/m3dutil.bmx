@@ -6,8 +6,11 @@ Import axe3d.ode
 
 Import "m3dexterns.bmx"
 
+Incbin "blur15.glsl"
 Incbin "clear.glsl"
+Incbin "copy.glsl"
 Incbin "distantlight.glsl"
+Incbin "halve.glsl"
 Incbin "mirror.glsl"
 Incbin "model.glsl"
 Incbin "pointlight.glsl"
@@ -106,7 +109,6 @@ Function m3dLoadTexture( path$ )
 	Local fmt=m3dPixelFormat( t )
 	Local tex=m3dCreateTexture( t.width,t.height,fmt,flags )
 	If Not tex Return 0
-	m3dSetTexturePath tex,path
 	m3dSetTextureData tex,t.pixels
 	Return tex
 End Function
@@ -137,7 +139,6 @@ Function m3dLoadCubeTexture( path$ )
 	Local fmt=m3dPixelFormat( t )
 	Local tex=m3dCreateCubeTexture( size,fmt,flags )
 	If Not tex Return 0
-	m3dSetTexturePath tex,path
 	m3dSetCubeTextureData tex,t.pixels
 	Return tex
 End Function
