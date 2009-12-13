@@ -15,16 +15,21 @@ Import "../../axe.mod/jasper.mod/*.h"
 Import "../../pub.mod/libpng.mod/*.h"
 Import "../../pub.mod/zlib.mod/*.h"
 
+Import "osgtest.cpp"
+
+
 ' OpenThreads
 
 Import "src/OpenThreads/common/Atomic.cpp"
 Import "src/OpenThreads/common/Version.cpp"
+
 ?win32
 Import "src/OpenThreads/win32/WIN32Condition.cpp"
 Import "src/OpenThreads/win32/Win32Mutex.cpp"
 Import "src/OpenThreads/win32/Win32Thread.cpp"
 Import "src/OpenThreads/win32/Win32ThreadBarrier.cpp"
 ?
+
 ?Linux
 Import "src/OpenThreads/pthreads/PThread.cpp"
 Import "src/OpenThreads/pthreads/PThreadBarrier.cpp"
@@ -102,8 +107,7 @@ Import "src/osg/Math.cpp"
 Import "src/osg/Matrixd.cpp"
 Import "src/osg/MatrixDecomposition.cpp"
 Import "src/osg/Matrixf.cpp"
-'# We don't build this one
-'# Import "Matrix_implementation.cpp"
+'Import "Matrix_implementation.cpp"
 Import "src/osg/MatrixTransform.cpp"
 Import "src/osg/Multisample.cpp"
 Import "src/osg/NodeCallback.cpp"
@@ -438,4 +442,5 @@ Import "src/osgWidget/VncClient.cpp"
 Import "src/osgWidget/Widget.cpp"
 Import "src/osgWidget/Window.cpp"
 Import "src/osgWidget/WindowManager.cpp"
+
 
