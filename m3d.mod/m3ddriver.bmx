@@ -2,7 +2,6 @@
 Strict
 
 Import brl.map
-Import blitz3d.blitz3dsdk
 Import axe3d.axe3d
 
 Import "m3dutil.bmx"
@@ -34,7 +33,7 @@ Type TM3DTexture Extends TTexture
 	End Function
 
 	Method FreeTexture()
-		bbFreeTexture _handle
+		'bbFreeTexture _handle
 	End Method
 	
 	Method TextureBuffer:TPixmap(frame)
@@ -42,23 +41,23 @@ Type TM3DTexture Extends TTexture
 	End Method
 
 	Method TextureBlend(blend_no)
-		bbTextureBlend _handle,blend_no
+		'bbTextureBlend _handle,blend_no
 	End Method
 	
 	Method TextureCoords(coords_no)
-		bbTextureCoords _handle,coords_no
+		'bbTextureCoords _handle,coords_no
 	End Method
 	
 	Method ScaleTexture(u#,v#)
-		bbScaleTexture _handle,u,v
+		'bbScaleTexture _handle,u,v
 	End Method
 	
 	Method PositionTexture(u#,v#)
-		bbPositionTexture _handle,u,v
+		'bbPositionTexture _handle,u,v
 	End Method
 
 	Method RotateTexture(angle#)
-		bbRotateTexture _handle,angle
+		'bbRotateTexture _handle,angle
 	End Method
 
 	Method TextureWidth()
@@ -66,19 +65,19 @@ Type TM3DTexture Extends TTexture
 	End Method
 
 	Method TextureHeight()
-		Return bbTextureHeight(_handle)
+		Return 'bbTextureHeight(_handle)
 	End Method
 
 	Method TextureName$()
-		Return bbTextureName(_handle)
+		Return 'bbTextureName(_handle)
 	End Method
 
 	Method SetCubeFace(face)
-		bbSetCubeFace _handle,face
+		'bbSetCubeFace _handle,face
 	End Method
 
 	Method SetCubeMode(mode)
-		bbSetCubeMode _handle,mode
+		'bbSetCubeMode _handle,mode
 	End Method
 		
 End Type
@@ -113,114 +112,130 @@ Type TM3DSurface Extends TSurface
 	
 	Method PaintSurface(brush:TBrush)
 		_brush=TM3DBrush(brush)
-		bbPaintSurface(_handle,_brush._handle)
+		'bbPaintSurface(_handle,_brush._handle)
 	End Method
 	
 	Method ClearSurface(clear_verts,clear_tris)
-		bbClearSurface _handle,clear_verts,clear_tris
+		'bbClearSurface _handle,clear_verts,clear_tris
 	End Method
 	
 	Method AddVertex(x#,y#,z#,u#=0.0,v#=0.0,w#=0.0)
-		bbAddVertex _handle,x,y,z,u,v,w
+		'bbAddVertex _handle,x,y,z,u,v,w
 	End Method
 	
 	Method AddTriangle(v0,v1,v2)
-		bbAddTriangle _handle,v0,v1,v2
+		'bbAddTriangle _handle,v0,v1,v2
 	End Method
 	
 	Method CountVertices()
-		Return bbCountVertices(_handle)
+		Return 'bbCountVertices(_handle)
 	End Method
 	
 	Method CountTriangles()
-		Return bbCountTriangles(_handle)
+		Return 'bbCountTriangles(_handle)
 	End Method
 	
 	Method VertexCoords(v,x#,y#,z#)
-		bbVertexCoords _handle,v,x,y,z
+		'bbVertexCoords _handle,v,x,y,z
 	End Method
 	
 	Method VertexColor(v,r#,g#,b#,a#=1.0)
-		bbVertexColor _handle,v,r,g,b,a
+		'bbVertexColor _handle,v,r,g,b,a
 	End Method
 
 	Method VertexNormal(v,nx#,ny#,nz#)
-		bbVertexNormal _handle,v,nx,ny,nz
+		'bbVertexNormal _handle,v,nx,ny,nz
 	End Method
 
 	Method VertexTexCoords(vid,u#,v#,w#,coord_set)
-		bbVertexTexCoords _handle,u,v,w,coord_set
+		'bbVertexTexCoords _handle,u,v,w,coord_set
 	End Method
 
 	Method VertexX#(v)
-		Return bbVertexX(_handle,v)
+		Return 'bbVertexX(_handle,v)
 	End Method
 	
 	Method VertexY#(v)
-		Return bbVertexY(_handle,v)
+		Return 'bbVertexY(_handle,v)
 	End Method
 
 	Method VertexZ#(v)
-		Return bbVertexZ(_handle,v)
+		Return 'bbVertexZ(_handle,v)
 	End Method
 
 	Method VertexRed#(v)
-		Return bbVertexRed(_handle,v)
+		Return 'bbVertexRed(_handle,v)
 	End Method
 
 	Method VertexGreen#(v)
-		Return bbVertexGreen(_handle,v)
+		Return 'bbVertexGreen(_handle,v)
 	End Method
 
 	Method VertexBlue#(v)
-		Return bbVertexBlue(_handle,v)
+		Return 'bbVertexBlue(_handle,v)
 	End Method
 
 	Method VertexAlpha#(v)
-		Return bbVertexAlpha(_handle,v)
+		Return 'bbVertexAlpha(_handle,v)
 	End Method
 
 	Method VertexNX#(v)
-		Return bbVertexNX(_handle,v)
+		Return 'bbVertexNX(_handle,v)
 	End Method
 
 	Method VertexNY#(v)
-		Return bbVertexNX(_handle,v)
+		Return 'bbVertexNX(_handle,v)
 	End Method
 
 	Method VertexNZ#(v)
-		Return bbVertexNZ(_handle,v)
+		Return 'bbVertexNZ(_handle,v)
 	End Method
 
 	Method VertexU#(v,coord_set=0)
-		Return bbVertexU(_handle,v)
+		Return 'bbVertexU(_handle,v)
 	End Method
 
 	Method VertexV#(v,coord_set=0)
-		Return bbVertexV(_handle,v)
+		Return 'bbVertexV(_handle,v)
 	End Method
 
 	Method VertexW#(v,coord_set=0)
-		Return bbVertexW(_handle,v)
+		Return 'bbVertexW(_handle,v)
 	End Method
 
 	Method TriangleVertex(tri_no,corner)
-		Return bbTriangleVertex(_handle,tri_no,corner)
+		Return 'bbTriangleVertex(_handle,tri_no,corner)
 	End Method
 
 	Method UpdateNormals()
-		bbUpdateNormals _handle
+		'bbUpdateNormals _handle
 	End Method
 	
 End Type
 
 Type TM3DBrush Extends TBrush
 	Global _all:TMap=New TMap	
-	Field _handle
+	Global _brushcount
 
-	Method Init:TM3DBrush(handle)
-		Local key$=String(handle)
-		_handle=handle
+	Field _handle
+	Field _material
+	
+	Field _r#,_g#,_b#
+	Field _a#
+	Field _shiny#
+	Field _fx
+	Field _blend
+	Field _texture:TM3DTexture
+	
+	Method Init:TM3DBrush(material)
+		_brushcount:+1
+		_handle=_brushcount
+		_r=1
+		_g=1
+		_b=1
+		_a=1
+		_material=material
+		Local key$=String(_handle)
 		MapInsert _all,key,Self
 		Return Self
 	End Method
@@ -241,7 +256,7 @@ Type TM3DBrush Extends TBrush
 		Local mat
 		mat=m3dcreatematerial()
 		m3dSetMaterialColor mat,"DiffuseColor",1,1,1		
-		Return New TM3dBrush.Init(mat)
+		Return New TM3DBrush.Init(mat)
 	End Function
 	
 	Function CreateBrush:TBrush(red#,green#,blue#)
@@ -251,6 +266,13 @@ Type TM3DBrush Extends TBrush
 		Return New TM3dBrush.Init(mat)
 	End Function
 	
+	Function CloneBrush:TM3DBrush(brush:TM3DBrush)
+		Local mat
+		mat=m3dcreatematerial()
+		m3dSetMaterialColor mat,"DiffuseColor",brush._r,brush._g,brush._b		
+		Return New TM3dBrush.Init(mat)
+	End Function
+
 	Method FreeBrush()
 	End Method
 
@@ -259,31 +281,33 @@ Type TM3DBrush Extends TBrush
 	End Method
 
 	Method Copy:TBrush()
-		Return b(bbCreateBrush(_handle))
+		Return CloneBrush(Self)
 	End Method
 			
 	Method BrushColor(r#,g#,b#)
-		bbBrushColor _handle,r,g,b
+		_r=r
+		_g=g
+		_b=b
 	End Method
 	
 	Method BrushAlpha(a#)
-		bbBrushAlpha _handle,a
+		_a=a
 	End Method
 	
 	Method BrushShininess(s#)
-		bbBrushShininess _handle,s
+		_shiny=s
 	End Method
 	
 	Method BrushTexture(texture:TTexture,frame=0,index=0)
-		bbBrushTexture _handle,TM3DTexture.h(texture),frame,index
+		_texture=TM3DTexture(texture)
 	End Method
 	
-	Method BrushBlend(blend_no)
-		bbBrushBlend _handle,blend_no
+	Method BrushBlend(blend)
+		_blend=blend
 	End Method
 	
-	Method BrushFX(fx_no)
-		bbBrushFX _handle,fx_no
+	Method BrushFX(fx)
+		_fx=fx
 	End Method
 	
 End Type
@@ -291,9 +315,14 @@ End Type
 Type TM3DEntity Extends TEntity
 	Global _all:TMap=New TMap
 	Field _handle
+	Field _class$
+	Field _name$
 	Field _brush:TM3DBrush
 	Field _parent:TM3DEntity
 	Field _kids:TList=New TList
+	
+	Function CloneEntity:TM3DEntity(entity:TM3DEntity)
+	End Function
 	
 	Method Init:TM3DEntity(handle,parent:TM3DEntity)
 		Local key$=String(handle)
@@ -319,43 +348,48 @@ Type TM3DEntity Extends TEntity
 	End Function
 
 	Method SetParent(parent:TEntity,glob=True) 
-		bbEntityParent h(parent),glob
+		_parent=TM3DEntity(parent)
 	End Method
 	
 	Method GetParent:TEntity() 
-		Return e(bbGetParent(_handle))
+		Return _parent
 	End Method
 
 	Method EntityClass$() 
-		Return bbEntityClass(_handle)
+		Return _class
 	End Method
 
 	Method EntityName$() 
-		Return bbEntityName(_handle)
+		Return _name
 	End Method
 
 	Method CountChildren() 
-		Return bbCountChildren(_handle)
+		Return _kids.Count()
 	End Method
 
-	Method GetChild:TEntity(child_no) 
-		Return e(bbGetChild(_handle,child_no))
+	Method GetChild:TEntity(childindex) 
+		Return TEntity(_kids.ValueAtIndex(childindex))
 	End Method
 
 	Method FindChild:TEntity(name$) 
-		Return e(bbFindChild(_handle,name))
+		Local kid:TM3DEntity
+		For kid=EachIn _kids
+			If kid._name=name
+				Return kid
+			EndIf
+		Next		
 	End Method
 
 	Method CopyEntity:TEntity(parent:TEntity=Null) 
-		Return e(bbCopyEntity(_handle,h(parent)))
+		Return CloneEntity(Self)
 	End Method
 
 	Method FreeEntity() 
-		bbFreeEntity _handle
+		'bbFreeEntity _handle
 	End Method
 
 	Method PositionEntity(x#,y#,z#,glob=False) 
-		bbPositionEntity _handle,x,y,z,glob
+		'bbPositionEntity _handle,x,y,z,glob
 	End Method
 	
 	Method MoveEntity(mx#,my#,mz#) 
@@ -378,197 +412,191 @@ Type TM3DEntity Extends TEntity
 	End Method
 
 	Method PointEntity(target:TEntity,roll#=0) 
-'		bbPointEntity _handle,h(target),roll
+'		'bbPointEntity _handle,h(target),roll
 	End Method
 
 	Method AlignToVector(vector_x#,vector_y#,vector_z#,axis,rate#=1.0)
-		bbAlignToVector _handle,vector_x#,vector_y#,vector_z#,axis,rate#
+		'bbAlignToVector _handle,vector_x#,vector_y#,vector_z#,axis,rate#
 	End Method
 	
 	Method LoadAnimSeq(path$) 
-		bbLoadAnimSeq _handle,path
+		'bbLoadAnimSeq _handle,path
 	End Method
 
 	Method ExtractAnimSeq(first_frame,last_frame,seq=0) 
-		bbExtractAnimSeq _handle,first_frame,last_frame,seq
+		'bbExtractAnimSeq _handle,first_frame,last_frame,seq
 	End Method
 
 	Method Animate(mode=1,speed#=1.0,seq=0,trans=0) 
-		bbAnimate _handle,mode,speed,seq,trans
+		'bbAnimate _handle,mode,speed,seq,trans
 	End Method
 
 	Method SetAnimTime(time#,seq=0) 
-		bbSetAnimTime _handle,time,seq
+		'bbSetAnimTime _handle,time,seq
 	End Method
 
 	Method AnimSeq() 
-		Return bbAnimSeq(_handle)
+		Return 'bbAnimSeq(_handle)
 	End Method
 	
 	Method AnimLength() 
-		Return bbAnimLength(_handle)
+		Return 'bbAnimLength(_handle)
 	End Method
 	
 	Method AnimTime#() 
-		Return bbAnimTime(_handle)
+		Return 'bbAnimTime(_handle)
 	End Method
 
 	Method Animating() 
-		Return bbAnimating(_handle)
+		Return 'bbAnimating(_handle)
 	End Method
 
 	Method EntityColor(r#,g#,b#) 
-		bbEntityColor(_handle,r#,g#,b#)
+		'bbEntityColor(_handle,r#,g#,b#)
 	End Method
 
 	Method EntityShininess(s#) 
-		bbEntityShininess(_handle,s#)
+		'bbEntityShininess(_handle,s#)
 	End Method
 
 	Method EntityTexture(texture:TTexture,frame=0,index=0) 
-		bbEntityTexture _handle,TM3DTexture.h(texture),frame,index 
+		'bbEntityTexture _handle,TM3DTexture.h(texture),frame,index 
 	End Method
 
 	Method EntityBlend(blend_no) 
-		bbEntityBlend _handle,blend_no
+		'bbEntityBlend _handle,blend_no
 	End Method
 
 	Method EntityFX(fx_no) 
-		bbEntityFX _handle,fx_no
+		'bbEntityFX _handle,fx_no
 	End Method
 
 	Method EntityAutoFade(near#,far#) 
-		bbEntityAutoFade _handle,near#,far#
+		'bbEntityAutoFade _handle,near#,far#
 	End Method
 
 	Method PaintEntity(brush:TBrush) 
 		_brush=TM3DBrush(brush)
-		bbPaintEntity _handle,TM3DBrush.h(brush)
+		'bbPaintEntity _handle,TM3DBrush.h(brush)
 	End Method
 
 	Method ShowEntity() 
-		bbShowEntity _handle
+		'bbShowEntity _handle
 	End Method
 
 	Method HideEntity() 
-		bbHideEntity _handle
+		'bbHideEntity _handle
 	End Method
 
 	Method NameEntity(name$) 
-		bbNameEntity _handle,name
+		'bbNameEntity _handle,name
 	End Method
 
 	Method EntityX#(glob=False) 
-		Return bbEntityX(_handle,glob)
+		Return 'bbEntityX(_handle,glob)
 	End Method
 
 	Method EntityY#(glob=False) 	
-		Return bbEntityY(_handle,glob)
+		Return 'bbEntityY(_handle,glob)
 	End Method
 
 	Method EntityZ#(glob=False) 	
-		Return bbEntityZ(_handle,glob)
+		Return 'bbEntityZ(_handle,glob)
 	End Method
 
 	Method EntityPitch#(glob=False) 
-		Return bbEntityPitch(_handle,glob)
+		Return 'bbEntityPitch(_handle,glob)
 	End Method
 
 	Method EntityYaw#(glob=False) 
-		Return bbEntityYaw(_handle,glob)
+		Return 'bbEntityYaw(_handle,glob)
 	End Method
 
 	Method EntityRoll#(glob=False) 
-		Return bbEntityRoll(_handle,glob)
+		Return 'bbEntityRoll(_handle,glob)
 	End Method
 
 
 	Method EntityPick:TEntity(range#) 
-		Return e(bbEntityPick(_handle,range))
+'		Return e('bbEntityPick(_handle,range))
 	End Method
 
 	Method LinePick:TEntity(x#,y#,z#,dx#,dy#,dz#,radius#=0.0)
-		Return e(bbLinePick(x,y,z,dx,dy,dz,radius))
+'		Return e('bbLinePick(x,y,z,dx,dy,dz,radius))
 	End Method
 	
 	Method DeltaYaw#(dest:TEntity) 
-		Return bbDeltaYaw(_handle,h(dest))
+		Return 'bbDeltaYaw(_handle,h(dest))
 	End Method
 
 	Method DeltaPitch#(dest:TEntity) 
-		Return bbDeltaPitch(_handle,h(dest))
+		Return 'bbDeltaPitch(_handle,h(dest))
 	End Method
 	
 	Method GetMatElement#(row,col) 
-		Return bbGetMatElement(_handle,row,col)
+		Return 'bbGetMatElement(_handle,row,col)
 	End Method
 
 	Method ResetEntity() 
-		bbResetEntity _handle
+		'bbResetEntity _handle
 	End Method
 
 	Method EntityRadius(rx#,ry#=0.0) 
-		bbEntityRadius _handle,rx,ry
+		'bbEntityRadius _handle,rx,ry
 	End Method
 
 	Method EntityBox(x#,y#,z#,w#,h#,d#) 	
-		bbEntityBox _handle,x,y,z,w,h,d
+		'bbEntityBox _handle,x,y,z,w,h,d
 	End Method
 
 	Method EntityType(type_no,recursive=False) 	
-		bbEntityType _handle,type_no,recursive
 	End Method
 
 	Method EntityPickMode(no,obscure=True) 	
-		bbEntityPickMode _handle,no,obscure
 	End Method
 
 	Method EntityCollided:TEntity(type_no) 
-		Return e(bbEntityCollided(_handle,type_no))
 	End Method
 
 	Method CountCollisions() 
-		Return bbCountCollisions(_handle)
+		Return 'bbCountCollisions(_handle)
 	End Method
 
 	Method CollisionX#(index) 
-		Return bbCollisionX(_handle,index)
+		Return 'bbCollisionX(_handle,index)
 	End Method
 
 	Method CollisionY#(index) 
-		Return bbCollisionY(_handle,index)
+		Return 'bbCollisionY(_handle,index)
 	End Method
 
 	Method CollisionZ#(index) 
-		Return bbCollisionZ(_handle,index)
+		Return 'bbCollisionZ(_handle,index)
 	End Method
 
 	Method CollisionNX#(index) 
-		Return bbCollisionNX(_handle,index)
+		Return 'bbCollisionNX(_handle,index)
 	End Method
 
 	Method CollisionNY#(index) 
-		Return bbCollisionNY(_handle,index)
+		Return 'bbCollisionNY(_handle,index)
 	End Method
 
 	Method CollisionNZ#(index) 
-		Return bbCollisionNZ(_handle,index)
+		Return 'bbCollisionNZ(_handle,index)
 	End Method
 
 	Method CollisionTime#(index) 
-		Return bbCollisionTime(_handle,index)
+		Return 'bbCollisionTime(_handle,index)
 	End Method
 
 	Method CollisionEntity:TEntity(index) 
-		Return e(bbCollisionEntity(_handle,index))
 	End Method
 
 	Method CollisionSurface:TSurface(index) 
-		Return TM3DSurface.s(bbCollisionSurface(_handle,index))
 	End Method
 
 	Method CollisionTriangle(index) 
-		Return bbCollisionX(_handle,index)
 	End Method
 
 	Method MeshCullRadius(radius#) 
@@ -587,7 +615,6 @@ Type TM3DEntity Extends TEntity
 	End Method
 
 	Method GetEntityType() 
-		Return bbGetEntityType(_handle)
 	End Method
 
 	Method GetEntityBrush:TBrush() 
@@ -595,7 +622,6 @@ Type TM3DEntity Extends TEntity
 	End Method
 
 	Method EntityOrder(order_no) 
-		bbEntityOrder _handle,order_no
 	End Method
 	
 	Method LightRange(range#)
