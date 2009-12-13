@@ -8,6 +8,7 @@ Type TMiniTexture Extends TTexture
 	Field file$,flags,blend=2,coords,u_scale#=1.0,v_scale#=1.0,u_pos#,v_pos#,angle#
 	Field file_abs$,width,height ' returned by Name/Width/Height commands
 	Field pixmap:TPixmap
+	Field buffer:TBuffer
 	Field gltex[1]
 	Field cube_pixmap:TPixmap[7]
 	Field no_frames=1
@@ -30,8 +31,8 @@ Type TMiniTexture Extends TTexture
 	
 	End Method
 		
-	Method TextureBuffer:TPixmap(frame)
-		Return pixmap
+	Method TextureBuffer:TBuffer(frame)
+		Return buffer
 	End Method
 
 	Function CreateTexture:TTexture(width,height,flags=1,frames=1,tex:TMiniTexture=Null)
@@ -44,6 +45,8 @@ Type TMiniTexture Extends TTexture
 		EndIf
 		
 		tex.pixmap=CreatePixmap(width*frames,height,PF_RGBA8888)
+		tex.buffer=New TBuffer
+		tex.buffer.pixmap=tex.pixmap
 
 		' ---
 		

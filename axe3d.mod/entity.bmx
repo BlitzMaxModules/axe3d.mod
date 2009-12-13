@@ -8,6 +8,15 @@ Import "surface.bmx"
 Import "matrix.bmx"
 
 Type TEntity Extends TMatrix
+	Field _id
+	
+	Method EntityID()
+		Return _id
+	End Method
+	
+	Method SetEntityID(id)
+		_id=id
+	End Method
 
 	Method SetParent(parent:TEntity,glob=True) Abstract
 	Method GetParent:TEntity() Abstract
@@ -90,6 +99,13 @@ Type TEntity Extends TMatrix
 	Method GetEntityType() Abstract
 	Method GetEntityBrush:TBrush() Abstract
 	Method EntityOrder(order_no) Abstract
+	
+	Method CaptureEntity()
+	End Method
+	Method EntityVisible(dest:TEntity)
+	End Method
+	Method EntityDistance#(dest:TEntity)
+	End Method
 	
 	Method LightRange(range#)
 	End Method

@@ -3,6 +3,8 @@ Strict
 Import brl.linkedlist
 Import brl.pixmap
 
+Import "graphicsbuffer.bmx"
+
 Type TTexture
 	Method FreeTexture() Abstract
 	Method TextureBlend(blend_no) Abstract
@@ -15,5 +17,5 @@ Type TTexture
 	Method TextureName$() Abstract
 	Method SetCubeFace(face) Abstract
 	Method SetCubeMode(mode) Abstract
-	Method TextureBuffer:TPixmap(frame) Abstract
+	Method TextureBuffer:TBuffer(frame) Abstract
 End Type

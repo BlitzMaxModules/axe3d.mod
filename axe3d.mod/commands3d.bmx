@@ -2679,7 +2679,7 @@ a graphic display's back buffer. To display 3D graphics on a texture, use
 after the call to <a href=#bbrenderworld>bbRenderWorld</a>
 </p>
 EndRem
-Function TextureBuffer:TPixmap(texture:TTexture,frame=0)
+Function TextureBuffer:TBuffer(texture:TTexture,frame=0)
 	Return texture.TextureBuffer(frame)
 End Function
 
@@ -4563,7 +4563,7 @@ to True
 </p>
 See Also: <a href=#bbaddvertex>bbAddVertex</a> <a href=#bbaddtriangle>bbAddTriangle</a>
 EndRem
-Function ClearSurface(surface:TSurface,clear_verts,clear_triangles=0)
+Function ClearSurface(surface:TSurface,clear_verts=1,clear_triangles=1)
 	surface.ClearSurface clear_verts,clear_triangles
 End Function
 
@@ -5105,7 +5105,8 @@ An entity's id is zero unless one has been specified earlier using the
 </p>
 See Also: <a href=#bbsetentityid>bbSetEntityID</a>
 EndRem
-Function EntityID(entity)'="bbEntityID"
+Function EntityID(entity:TEntity)
+	Return entity.EntityID()
 End Function
 
 Rem
@@ -5118,7 +5119,8 @@ about:
 </p>
 See Also: <a href=#bbentityid>bbEntityID</a>
 EndRem
-Function SetEntityID(entity,id)'="bbSetEntityID"
+Function SetEntityID(entity:TEntity,id)
+	entity.SetEntityID id
 End Function
 
 Rem
@@ -5137,7 +5139,8 @@ and current is not desired.
 </p>
 See Also: <a href=#bbcaptureworld>bbCaptureWorld</a>
 EndRem
-Function CaptureEntity(entity)'="bbCaptureEntity"
+Function CaptureEntity(entity:TEntity)
+	entity.CaptureEntity 
 End Function
 
 Rem
@@ -5155,7 +5158,8 @@ See the <a href=#bbentitypickmode>bbEntityPickMode</a> for setting an entity as 
 </p>
 See Also: <a href=#bbentitypickmode>bbEntityPickMode</a>
 EndRem
-Function EntityVisible(src_entity,dest_entity)'="bbEntityVisible"
+Function EntityVisible(src:TEntity,dest:TEntity)
+	Return src.EntityVisible(dest)
 End Function
 
 Rem
@@ -5167,7 +5171,8 @@ about:
 </table>
 </p>
 EndRem
-Function EntityDistance#(src_entity,dest_entity)'="bbEntityDistance"
+Function EntityDistance#(src:TEntity,dest:TEntity)
+	Return src.EntityDistance(dest)
 End Function
 
 Rem
@@ -5184,7 +5189,8 @@ the y axis only.
 </p>
 See Also: <a href=#bbdeltapitch>bbDeltaPitch</a>
 EndRem
-Function DeltaYaw#(src_entity,dest_entity)'="bbDeltaYaw"
+Function DeltaYaw#(src:TEntity,dest:TEntity)
+	Return src.DeltaYaw(src)
 End Function
 
 Rem
@@ -5201,7 +5207,8 @@ the x axis only.
 </p>
 See Also: <a href=#bbdeltayaw>bbDeltaYaw</a>
 EndRem
-Function DeltaPitch#(src_entity,dest_entity)'="bbDeltaPitch"
+Function DeltaPitch#(src:TEntity,dest:TEntity)
+	Return src.DeltaPitch(src)
 End Function
 
 Rem

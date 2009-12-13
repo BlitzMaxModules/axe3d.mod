@@ -1,6 +1,65 @@
 Import "graphicsbuffer.bmx"
 
 Rem
+bbdoc: <p> The <a href=#bbtext>bbText</a> command prints the <b>string</b> specified at the pixel coordinate <b>x</b>,<b>y.</b> </p> <p> <a href=#bbtext>bbText</a> uses the current font which can be modified with the <a href=#bbsetfont>bbSetFont</a> command and the current color which can be modified with the <a href=#bbcolor>bbColor</a> command.
+about:
+<table class="arg">
+<tr><td class=argname>x</td><td class=argvalue>horizontal pixel position of top left enclosing rectangle</td></tr>
+<tr><td class=argname>y</td><td class=argvalue>vertical pixel position of the top left enclosing rectangle</td></tr>
+<tr><td class=argname>str$</td><td class=argvalue>string/text to print</td></tr>
+<tr><td class=argname>centerX</td><td class=argvalue>True to center text horizontally</td></tr>
+<tr><td class=argname>centerY</td><td class=argvalue>True to center text vertically</td></tr>
+</table>
+</p>
+<p>
+The optional centering parameters allow the specified pixel
+position to be used as the center of the text printed rather
+than representing the top left position of the region.
+</p>
+See Also: <a href=#bbsetfont>bbSetFont</a> <a href=#bbstringwidth>bbStringWidth</a> <a href=#bbstringheight>bbStringHeight</a>
+EndRem
+Function Text(x,y,str$,centerX=False,centerY=False)
+End Function
+
+
+Rem
+bbdoc: <p> The <a href=#bbsetbuffer>bbSetBuffer</a> command is used to set the current graphics buffer.
+about:
+<table class="arg">
+<tr><td class=argname>buffer</td><td class=argvalue>a valid graphics buffer</td></tr>
+</table>
+</p>
+<p>
+After calling <a href=#bbsetbuffer>bbSetBuffer</a>, All 2D rendering commands will write to the specified
+graphics buffer. 3D rendering always writes to the back buffer.
+</p>
+<p>
+<a href=#bbsetbuffer>bbSetBuffer</a> also resets the <a href=#bborigin>bbOrigin</a> to 0,0 and the <a href=#bbviewport>bbViewport</a> to the
+dimensions of the entire selected buffer.
+</p>
+<p>
+<b>buffer</b> should be a valid graphics buffer returned by <a href=#bbfrontbuffer>bbFrontBuffer</a>,
+<a href=#bbbackbuffer>bbBackBuffer</a>, <a href=#bbimagebuffer>bbImageBuffer</a>, <a href=#bbtexturebuffer>bbTextureBuffer</a> or the result of a previous call
+to <a href=#bbgraphicsbuffer>bbGraphicsBuffer</a>.
+</p>
+<p>
+At the beginning of program execution and following any call
+to <a href=#bbgraphics>bbGraphics</a> the current graphics buffer is set to the display's
+<a href=#bbfrontbuffer>bbFrontBuffer</a>.
+</p>
+<p>
+After a call to <a href=#bbgraphics3d>bbGraphics3D</a> the current buffer is set to the
+display's <a href=#bbbackbuffer>bbBackBuffer</a>.
+</p>
+See Also: <a href=#bbgraphicsbuffer>bbGraphicsBuffer</a> <a href=#bbfrontbuffer>bbFrontBuffer</a> <a href=#bbbackbuffer>bbBackBuffer</a> <a href=#bbimagebuffer>bbImageBuffer</a> <a href=#bbtexturebuffer>bbTextureBuffer</a>
+EndRem
+Function SetBuffer(buffer:TBuffer)
+	If buffer
+		TBuffer.Active=buffer
+	EndIf
+End Function
+
+Rem
 bbdoc: <p> The <a href=#bbreadpixel>bbReadPixel</a> function determines the color of a pixel at the specified location of the specified graphics buffer.
 about:
 <table class="arg">
@@ -50,9 +109,9 @@ graphics buffer, see <a href=#bbsetbuffer>bbSetBuffer</a> for more details.
 </p>
 See Also: <a href=#bbreadpixel>bbReadPixel</a> <a href=#bbcopypixel>bbCopyPixel</a> <a href=#bbwritepixelfast>bbWritePixelFast</a> <a href=#bblockbuffer>bbLockBuffer</a>
 EndRem
-Function WritePixel(x,y,color,buffer:TBuffer=Null)
+Function WritePixel(x,y,Color,buffer:TBuffer=Null)
 	If Not buffer buffer=TBuffer.Active
-	buffer.pixmap.WritePixel x,y,color
+	buffer.pixmap.WritePixel x,y,Color
 End Function
 
 Rem
@@ -524,7 +583,7 @@ the value parameter can in fact be any value.
 </p>
 See Also: <a href=#bbwrite>bbWrite</a> <a href=#bbinput>bbInput</a> <a href=#bblocate>bbLocate</a>
 EndRem
-Function Print(value$z)="bbPrint"
+Function bbPrint(value$z)="bbPrint"
 
 Rem
 bbdoc: <p> The <a href=#bbwrite>bbWrite</a> command is similar to the <a href=#bbprint>bbPrint</a> command but the cursor is not moved to a new line at the completion of the command.
@@ -763,26 +822,6 @@ about:
 See Also: <a href=#bbcolor>bbColor</a> <a href=#bbgetcolor>bbGetColor</a> <a href=#bbcolorred>bbColorRed</a> <a href=#bbcolorgreen>bbColorGreen</a>
 EndRem
 Function ColorBlue()="bbColorBlue"
-
-Rem
-bbdoc: <p> The <a href=#bbtext>bbText</a> command prints the <b>string</b> specified at the pixel coordinate <b>x</b>,<b>y.</b> </p> <p> <a href=#bbtext>bbText</a> uses the current font which can be modified with the <a href=#bbsetfont>bbSetFont</a> command and the current color which can be modified with the <a href=#bbcolor>bbColor</a> command.
-about:
-<table class="arg">
-<tr><td class=argname>x</td><td class=argvalue>horizontal pixel position of top left enclosing rectangle</td></tr>
-<tr><td class=argname>y</td><td class=argvalue>vertical pixel position of the top left enclosing rectangle</td></tr>
-<tr><td class=argname>str$</td><td class=argvalue>string/text to print</td></tr>
-<tr><td class=argname>centerX</td><td class=argvalue>True to center text horizontally</td></tr>
-<tr><td class=argname>centerY</td><td class=argvalue>True to center text vertically</td></tr>
-</table>
-</p>
-<p>
-The optional centering parameters allow the specified pixel
-position to be used as the center of the text printed rather
-than representing the top left position of the region.
-</p>
-See Also: <a href=#bbsetfont>bbSetFont</a> <a href=#bbstringwidth>bbStringWidth</a> <a href=#bbstringheight>bbStringHeight</a>
-EndRem
-Function Text(x,y,str$z,centerX=False,centerY=False)="bbText"
 
 Rem
 bbdoc: <p> The <a href=#bbloadfont>bbLoadFont</a> function loads a font and returns a font handle which can subsequently used with commands such as <a href=#bbsetfont>bbSetFont</a> and <a href=#bbfreefont>bbFreeFont</a>.
@@ -1494,39 +1533,6 @@ image's mask it is slower but more accurate than using the
 See Also: <a href=#bbimagerectoverlap>bbImageRectOverlap</a>
 EndRem
 Function ImageRectCollide(image,x,y,frame,rectx,recty,rectw,recth)="bbImageRectCollide"
-
-Rem
-bbdoc: <p> The <a href=#bbsetbuffer>bbSetBuffer</a> command is used to set the current graphics buffer.
-about:
-<table class="arg">
-<tr><td class=argname>buffer</td><td class=argvalue>a valid graphics buffer</td></tr>
-</table>
-</p>
-<p>
-After calling <a href=#bbsetbuffer>bbSetBuffer</a>, All 2D rendering commands will write to the specified
-graphics buffer. 3D rendering always writes to the back buffer.
-</p>
-<p>
-<a href=#bbsetbuffer>bbSetBuffer</a> also resets the <a href=#bborigin>bbOrigin</a> to 0,0 and the <a href=#bbviewport>bbViewport</a> to the
-dimensions of the entire selected buffer.
-</p>
-<p>
-<b>buffer</b> should be a valid graphics buffer returned by <a href=#bbfrontbuffer>bbFrontBuffer</a>,
-<a href=#bbbackbuffer>bbBackBuffer</a>, <a href=#bbimagebuffer>bbImageBuffer</a>, <a href=#bbtexturebuffer>bbTextureBuffer</a> or the result of a previous call
-to <a href=#bbgraphicsbuffer>bbGraphicsBuffer</a>.
-</p>
-<p>
-At the beginning of program execution and following any call
-to <a href=#bbgraphics>bbGraphics</a> the current graphics buffer is set to the display's
-<a href=#bbfrontbuffer>bbFrontBuffer</a>.
-</p>
-<p>
-After a call to <a href=#bbgraphics3d>bbGraphics3D</a> the current buffer is set to the
-display's <a href=#bbbackbuffer>bbBackBuffer</a>.
-</p>
-See Also: <a href=#bbgraphicsbuffer>bbGraphicsBuffer</a> <a href=#bbfrontbuffer>bbFrontBuffer</a> <a href=#bbbackbuffer>bbBackBuffer</a> <a href=#bbimagebuffer>bbImageBuffer</a> <a href=#bbtexturebuffer>bbTextureBuffer</a>
-EndRem
-Function SetBuffer(buffer)="bbSetBuffer"
 
 Rem
 bbdoc: <p> Returns the currently selected graphics buffer.

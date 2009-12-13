@@ -76,7 +76,7 @@ Type TBBTexture Extends TTexture
 		bbSetCubeMode _handle,mode
 	End Method
 
-	Method TextureBuffer:TPixmap(frame)
+	Method TextureBuffer:TBuffer(frame)
 	End Method
 		
 End Type
@@ -608,6 +608,7 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	End Method
 
 	Method LoadTexture:TTexture(file$,flags=1)
+		Return New TBBTexture.init(bbLoadTexture(file,flags))
 	End Method
 	
 	Method CreateTexture:TTexture(width,height,flags=0,frames=1)
@@ -654,7 +655,7 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	End Method
 	
 	Method Graphics3D:TGraphics(w,h,d=0,m=0,r=60)
-		bbBeginBlitz3d
+		bbBeginBlitz3D
 		bbGraphics3D(w,h,d,m)
 	End Method
 
@@ -663,7 +664,7 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	End Method
 	
 	Method Wireframe(enable)
-		bbWireframe enable
+		bbWireFrame enable
 	End Method
 
 	Method AmbientLight(r#,g#,b#)

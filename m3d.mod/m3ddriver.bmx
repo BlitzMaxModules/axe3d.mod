@@ -12,6 +12,7 @@ Type TM3DTexture Extends TTexture
 	Global _all:TMap=New TMap	
 	Field _handle
 	Field _pixmap:TPixmap
+	Field _buffer:TBuffer
 
 	Method Init:TM3DTexture(handle)
 		Local key$=String(handle)
@@ -36,8 +37,8 @@ Type TM3DTexture Extends TTexture
 		'bbFreeTexture _handle
 	End Method
 	
-	Method TextureBuffer:TPixmap(frame)
-		Return _pixmap
+	Method TextureBuffer:TBuffer(frame)
+		Return _buffer
 	End Method
 
 	Method TextureBlend(blend_no)
