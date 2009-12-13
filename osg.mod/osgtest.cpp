@@ -31,6 +31,7 @@
 
 extern "C" int osgmain(int argc, char** argv);
 
+using namespace osg;
 
 int osgmain(int argc, char** argv){
     osg::ArgumentParser arguments(&argc,argv);

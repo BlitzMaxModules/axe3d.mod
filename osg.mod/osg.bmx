@@ -413,6 +413,10 @@ Import "src/osgViewer/CompositeViewer.cpp"
 Import "src/osgViewer/GraphicsWindowX11.cpp"
 Import "src/osgViewer/PixelBufferX11.cpp"
 ?
+?Win32
+Import "src/osgViewer/GraphicsWindowWin32.cpp"
+Import "src/osgViewer/PixelBufferWin32.cpp"
+?
 Import "src/osgViewer/HelpHandler.cpp"
 Import "src/osgViewer/Renderer.cpp"
 Import "src/osgViewer/Scene.cpp"
