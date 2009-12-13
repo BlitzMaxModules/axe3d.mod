@@ -1,6 +1,8 @@
 
 Strict
 
+?win32
+
 Import brl.map
 Import blitz3d.blitz3dsdk
 Import axe3d.axe3D
@@ -757,3 +759,4 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 
 End Type
 
+?
