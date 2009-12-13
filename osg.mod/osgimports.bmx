@@ -7,7 +7,6 @@ ModuleInfo "CC_OPTS: -DOSG_LIBRARY_STATIC"
 ?Win32
 ModuleInfo "CC_OPTS: -D_GLIBCXX_USE_WCHAR_T"
 ?
-ModuleInfo "CC_OPTS: -fno-inline"
 
 Import "include/*.h"
 Import "../../pub.mod/freetype.mod/include/*.h"

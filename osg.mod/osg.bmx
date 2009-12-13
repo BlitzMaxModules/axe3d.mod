@@ -18,7 +18,7 @@ To find out more about the OpenSceneGraph please read
 the full introduction to the OpenSceneGraph project.
 End Rem
 
-Module axe3D.osg
+Module axe3d.osg
 
 ModuleInfo "Version: 1.00"
 ModuleInfo "Author: Simon Armstrong"
@@ -29,3 +29,4 @@ ModuleInfo "History: 0.01 Release"
 ModuleInfo "History: beastly build"
 
 'Import "osgimports.bmx"
+'import "osgplugins.bmx"
