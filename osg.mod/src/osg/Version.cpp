@@ -14,8 +14,6 @@
 #include <string>
 #include <stdio.h>
 
-extern "C" {
-
 const char* osgGetVersion()
 {
     static char osg_version[256];
@@ -55,4 +53,3 @@ const char* osgGetLibraryName()
     return "OpenSceneGraph Library";
 }
 
-}

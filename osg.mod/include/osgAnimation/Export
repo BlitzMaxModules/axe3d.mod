@@ -15,9 +15,6 @@
 #ifndef OSGANIMATION_EXPORT_
 #define OSGANIMATION_EXPORT_ 1
 
-// simon was here
-#include<osg/Config>
-
 #if defined(_MSC_VER)
     #pragma warning( disable : 4244 )
     #pragma warning( disable : 4251 )
