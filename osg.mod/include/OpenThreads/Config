@@ -32,6 +32,5 @@
 /* #undef OT_LIBRARY_STATIC */
 
 #define _OPENTHREADS_ATOMIC_USE_MUTEX
-#define OT_LIBRARY_STATIC
 
 #endif

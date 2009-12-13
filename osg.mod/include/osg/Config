@@ -32,6 +32,4 @@
 /* #undef OSG_USE_UTF8_FILENAME */
 #define OSG_DISABLE_MSVC_WARNINGS
 
-#define OSG_LIBRARY_STATIC 1
-
 #endif

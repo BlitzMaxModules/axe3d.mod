@@ -28,7 +28,9 @@ ModuleInfo "License: OpenSceneGraph Public License (OSGPL)"
 ModuleInfo "History: 0.01 Release"
 ModuleInfo "History: beastly build"
 
-ModuleInfo "CC_OPTS: -fexceptions"
+ModuleInfo "CC_OPTS: -fexceptions" 
+ModuleInfo "CC_OPTS: -DOT_LIBRARY_STATIC"
+ModuleInfo "CC_OPTS: -DOSG_LIBRARY_STATIC"
 
 Import "include/*.h"
 Import "../../pub.mod/freetype.mod/include/*.h"
