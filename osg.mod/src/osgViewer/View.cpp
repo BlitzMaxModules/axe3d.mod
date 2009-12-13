@@ -331,6 +331,7 @@ const osgDB::ImagePager* View::getImagePager() const
 
 void View::setCameraManipulator(osgGA::MatrixManipulator* manipulator)
 {
+
     _cameraManipulator = manipulator;
     
     if (_cameraManipulator.valid())

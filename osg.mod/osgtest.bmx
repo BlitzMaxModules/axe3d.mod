@@ -1,6 +1,7 @@
 Import axe3d.osg
 
 osgmain(0,Null)
+
 Rem
 Building osgtest
 Compiling:osgtest.bmx
