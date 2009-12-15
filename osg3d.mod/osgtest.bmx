@@ -1,4 +1,4 @@
-Import axe3d.osg
+Import axe3d.osg3d
 
 Extern "C" 
 
