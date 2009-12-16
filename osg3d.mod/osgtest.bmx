@@ -1,13 +1,19 @@
-Import axe3d.osg3d
+Framework axe3d.osg3d
+
+'Import brl.standardio
+Import pub.opengl
+
+Import "-lgcc"
 
 Extern "C" 
-
 Function osgGetVersion$z()
-
 Function osgmain%()
-
 End Extern
 
-Print "OSGVersion="+osgGetVersion()
+
+'DebugLog "OSGVersion="+osgGetVersion()
+
+DebugStop
 
 osgmain()
+

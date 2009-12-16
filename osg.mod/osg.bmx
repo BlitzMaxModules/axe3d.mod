@@ -29,6 +29,6 @@ ModuleInfo "History: 0.01 Release"
 ModuleInfo "History: beastly build"
 
 
-Import "osgimports.bmx"
+'Import "coreimports.bmx"
 
 'Import "osgplugins.bmx" - not yet implemented

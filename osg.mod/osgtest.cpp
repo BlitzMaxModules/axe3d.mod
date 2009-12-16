@@ -31,7 +31,7 @@
 
 extern "C" int osgmain();
 
-using namespace osg;
+//using namespace osg;
 
 int osgmain(){
 	int argc;

@@ -8,6 +8,8 @@ Function osgmain%()
 
 End Extern
 
-Print "OSGVersion="+osgGetVersion()
+
+
+'Print "OSGVersion="+osgGetVersion()
 
 osgmain()

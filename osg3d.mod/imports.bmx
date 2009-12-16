@@ -8,6 +8,7 @@
 
 Strict
 
+ModuleInfo "LD_OPTS: -Map test.map" 
 ModuleInfo "CC_OPTS: -fexceptions" 
 ModuleInfo "CC_OPTS: -DOT_LIBRARY_STATIC"
 ModuleInfo "CC_OPTS: -DOSG_LIBRARY_STATIC"

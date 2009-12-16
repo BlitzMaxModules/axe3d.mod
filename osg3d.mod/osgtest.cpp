@@ -31,16 +31,14 @@
 
 extern "C" int osgmain();
 
-using namespace osg;
+//using namespace osg;
 
 int osgmain(){
 	int argc;
-	char* argv[3];
+	char* argv[1];
 	
-	argc=3;
+	argc=1;
 	argv[0]="osg.mod";
-	argv[1]="--image";
-	argv[2]="c:\\test.png";
 
 	osg::ArgumentParser arguments(&argc,argv);
 	
@@ -52,7 +50,6 @@ int osgmain(){
 	arguments.getApplicationUsage()->addCommandLineOption("--login <url> <username> <password>","Provide authentication information for http file access.");
 	
 	osgViewer::Viewer viewer(arguments);
-	return 0;
 	
 	// set up the camera manipulators.
 	{
