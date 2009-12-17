@@ -9,14 +9,46 @@ Import axe3d.axe3D
 
 blitz3d_driver = New TB3DSDKDriver
 
+Type TBBTextureLock Extends TTextureLock	
+	Field _owner:TTexture
+	Field _frame:Int 
+	Field _buffer
+
+	Method Init:TBBTextureLock(owner:TBBTexture,frame)
+		_owner=owner
+		_frame=frame
+		_buffer=bbTextureBuffer(owner._handle,frame)
+		Return Self
+	End Method			
+	
+	Method Lock()
+		bbLockBuffer _buffer
+	End Method
+
+	Method Unlock()
+		bbUnlockBuffer _buffer
+	End Method
+	
+	Method SetRGBA(x,y,rgba)
+		bbWritePixelFast x,y,rgba,_buffer
+	End Method
+
+	Method GetRGBA(x,y)
+		Return bbReadPixelFast(x,y,_buffer)
+	End Method
+End Type
+
+
 Type TBBTexture Extends TTexture
 	Global _all:TMap=New TMap	
 	Field _handle
+	Field _buffer:TBBTextureLock
 
 	Method Init:TBBTexture(handle)
 		Local key$=String(handle)
 		_handle=handle
 		MapInsert _all,key,Self
+		_buffer=New TBBTextureLock.Init(Self,0)
 		Return Self
 	End Method
 
@@ -76,15 +108,15 @@ Type TBBTexture Extends TTexture
 		bbSetCubeMode _handle,mode
 	End Method
 
-	Method TextureBuffer:TBuffer(frame)
+	Method TextureBuffer:TTextureLock(frame)
+		Return _buffer
 	End Method
-		
+			
 End Type
 
 Type TBBSurface Extends TSurface
 	Global _all:TMap=New TMap
 	Field _handle
-	Field _brush:TBBBrush
 
 	Method Init:TBBSurface(handle)
 		Local key$=String(handle)
@@ -106,19 +138,18 @@ Type TBBSurface Extends TSurface
 	End Function
 
 	Method GetSurfaceBrush:TBrush()	
-		Return _brush
+		Return TBBBrush.b(bbGetSurfaceBrush(_handle))
 	End Method
 	
 	Method PaintSurface(brush:TBrush)
-		_brush=TBBBrush(brush)
-		bbPaintSurface(_handle,_brush._handle)
+		bbPaintSurface(_handle,TBBBrush.h(brush))
 	End Method
 	
 	Method ClearSurface(clear_verts,clear_tris)
 		bbClearSurface _handle,clear_verts,clear_tris
 	End Method
 	
-	Method AddVertex(x#,y#,z#,u#=0.0,v#=0.0,w#=0.0)
+	Method AddVertex(x#,y#,z#,u#=0.0,v#=0.0,w#=1.0)
 		bbAddVertex _handle,x,y,z,u,v,w
 	End Method
 	
@@ -147,7 +178,7 @@ Type TBBSurface Extends TSurface
 	End Method
 
 	Method VertexTexCoords(vid,u#,v#,w#,coord_set)
-		bbVertexTexCoords _handle,u,v,w,coord_set
+		bbVertexTexCoords _handle,vid,u,v,w,coord_set
 	End Method
 
 	Method VertexX#(v)
@@ -209,8 +240,97 @@ Type TBBSurface Extends TSurface
 	Method UpdateNormals()
 		bbUpdateNormals _handle
 	End Method
+
+	Method MeshCullBox(x#,y#,z#,w#,h#,d#)
+		bbMeshCullBox _handle,x,y,z,w,h,d
+	End Method
+
+	Method FlipMesh(dest:TEntity)
+		bbFlipMesh TBBEntity.h(dest)
+	End Method
+	
+	Method AddMesh(src:TEntity)
+		bbAddMesh _handle,TBBEntity.h(src)
+	End Method
+	
+	Method LightMesh(red#,green#,blue#,range#=0,x#=0,y#=0,z#=0)
+		bbLightMesh _handle,red,green,blue,range,x,y,z
+	End Method
+	
+	Method FitMesh(x#,y#,z#,width#,height#,depth#,uniform=0)
+		bbFitMesh x,y,z,width,height,depth,uniform
+	End Method
+	
+	Method ScaleMesh(x_scale#,y_scale#,z_scale#)
+		bbScaleMesh _handle,x_scale,y_scale,z_scale
+	End Method
+	
+	Method RotateMesh(pitch#,yaw#,roll#)
+		bbRotateMesh _handle,pitch,yaw,roll
+	End Method
+
+	Method PositionMesh(x#,y#,z#)
+		bbPositionMesh _handle,x,y,z
+	End Method
+
+	Method MeshWidth#()
+		Return bbMeshWidth(_handle)
+	End Method
+	Method MeshHeight#()
+		Return bbMeshHeight(_handle)
+	End Method
+	Method MeshDepth#()
+		Return bbMeshDepth(_handle)
+	End Method
+
+End Type
+
+
+Type TBBEntityBrush Extends TBrush
+	Field _owner:TBBEntity
+	Field _handle
+
+	Method Init:TBBEntityBrush(owner:TBBEntity)
+		_owner=owner
+		_handle=owner._handle
+		Return Self
+	End Method
+	
+	Method Copy:TBrush()
+	End Method
+
+	Method GetBrushTexture:TTexture(index=0)
+	End Method
+
+	Method FreeBrush()
+	End Method
+
+	Method BrushColor(r#,g#,b#)
+		bbEntityColor _handle,r,g,b
+	End Method
+	
+	Method BrushAlpha(a#)
+		bbEntityAlpha _handle,a
+	End Method
+	
+	Method BrushShininess(s#)
+		bbEntityShininess _handle,s
+	End Method
+	
+	Method BrushTexture(texture:TTexture,frame=0,index=0)
+		bbEntityTexture _handle,TBBTexture.h(texture),frame,index
+	End Method
+		
+	Method BrushBlend(blend_no)
+		bbEntityBlend _handle,blend_no
+	End Method
+	
+	Method BrushFX(fx_no)
+		bbEntityFX _handle,fx_no
+	End Method
 	
 End Type
+
 
 Type TBBBrush Extends TBrush
 	Global _all:TMap=New TMap	
@@ -239,6 +359,10 @@ Type TBBBrush Extends TBrush
 		Return b(bbCreateBrush(_handle))
 	End Method
 
+	Method GetBrushTexture:TTexture(index=0)
+		Return TBBTexture.t(bbGetBrushTexture(_handle,index))
+	End Method
+
 	Method FreeBrush()
 		bbFreeBrush _handle
 	End Method
@@ -258,11 +382,7 @@ Type TBBBrush Extends TBrush
 	Method BrushTexture(texture:TTexture,frame=0,index=0)
 		bbBrushTexture _handle,TBBTexture.h(texture),frame,index
 	End Method
-	
-	Method GetBrushTexture:TTexture(index=0)
-		Return TBBTexture.t(bbGetBrushTexture(_handle,index))
-	End Method
-	
+		
 	Method BrushBlend(blend_no)
 		bbBrushBlend _handle,blend_no
 	End Method
@@ -276,12 +396,11 @@ End Type
 Type TBBEntity Extends TEntity
 	Global _all:TMap=New TMap
 	Field _handle
-	Field _brush:TBBBrush
 	
 	Method Init:TBBEntity(handle)
 		Local key$=String(handle)
 		_handle=handle
-		MapInsert _all,key,Self
+		MapInsert _all,key,Self		
 		Return Self
 	End Method
 		
@@ -298,7 +417,7 @@ Type TBBEntity Extends TEntity
 	End Function
 
 	Method SetParent(parent:TEntity,glob=True) 
-		bbEntityParent h(parent),glob
+		bbEntityParent _handle,h(parent),glob
 	End Method
 	
 	Method GetParent:TEntity() 
@@ -422,7 +541,6 @@ Type TBBEntity Extends TEntity
 	End Method
 
 	Method PaintEntity(brush:TBrush) 
-		_brush=TBBBrush(brush)
 		bbPaintEntity _handle,TBBBrush.h(brush)
 	End Method
 
@@ -461,7 +579,6 @@ Type TBBEntity Extends TEntity
 	Method EntityRoll#(glob=False) 
 		Return bbEntityRoll(_handle,glob)
 	End Method
-
 
 	Method EntityPick:TEntity(range#) 
 		Return e(bbEntityPick(_handle,range))
@@ -551,43 +668,98 @@ Type TBBEntity Extends TEntity
 		Return bbCollisionX(_handle,index)
 	End Method
 
-	Method MeshCullRadius(radius#) 
-	End Method
-
-	Method EntityScaleX#(glob=False) 
-		Return 1
-	End Method
-
-	Method EntityScaleY#(glob=False) 
-		Return 1
-	End Method
-
-	Method EntityScaleZ#(glob=False) 
-		Return 1
-	End Method
-
 	Method GetEntityType() 
 		Return bbGetEntityType(_handle)
 	End Method
 
 	Method GetEntityBrush:TBrush() 
-		Return _brush
+		Return TBBBrush.b(bbGetEntityBrush(_handle))
 	End Method
 
 	Method EntityOrder(order_no) 
 		bbEntityOrder _handle,order_no
 	End Method
+
+	Method CaptureEntity()
+		bbCaptureEntity _handle
+	End Method
+
+	Method EntityVisible(dest:TEntity)
+		Return bbEntityVisible(_handle,TBBEntity.h(dest))
+	End Method
+	
+	Method EntityDistance#(dest:TEntity)
+		Return bbEntityDistance(_handle,TBBEntity.h(dest))
+	End Method
 	
 	Method LightRange(range#)
+		bbLightRange _handle,range
 	End Method
 	
 	Method LightColor(red#,green#,blue#)
+		bbLightColor _handle,red,green,blue
 	End Method
 
 	Method LightConeAngles(inner_angle#,outer_angle#)
+		bbLightConeAngles _handle,inner_angle,outer_angle
 	End Method
 
 	Method CameraClsColor(r#,g#,b#)
+		bbCameraClsColor _handle,r,g,b
+	End Method
+	
+	Method CameraViewport(x,y,width,height)
+		bbCameraViewport _handle,x,y,width,height
+	End Method
+
+	Method CameraClsMode(cls_color,cls_zbuffer)
+		bbCameraClsMode _handle,cls_color,cls_zbuffer
+	End Method
+
+	Method CameraRange(near#,far#)
+		bbCameraRange _handle,near,far
+	End Method
+	
+	Method CameraZoom(zoom#)
+		bbCameraZoom _handle,zoom
+	End Method
+	
+	Method CameraProjMode(mode)
+		bbCameraProjMode _handle,mode
+	End Method
+	
+	Method CameraFogMode(mode)
+		bbCameraFogMode _handle,mode
+	End Method
+	
+	Method CameraFogColor(red#,green#,blue#)
+		bbCameraFogColor _handle,red,green,blue
+	End Method
+	
+	Method CameraFogRange(near#,far#)
+		bbCameraFogRange _handle,near,far
+	End Method
+	
+	Method CameraProject(x#,y#,z#)
+		bbCameraProject _handle,x,y,z
+	End Method
+		
+	Method CountSurfaces()
+		Return bbCountSurfaces(_handle)
+	End Method
+
+	Method GetSurface:TSurface(index)
+		Return TBBSurface.s(bbGetSurface(_handle,index))
+	End Method
+
+	Method CreateSurface:TSurface()
+		Return New TBBSurface.init(bbCreateSurface(_handle))
+	End Method 
+
+	Method FindSurface:TSurface(brush:TBrush)
+		Local handle
+		handle=bbFindSurface(_handle,TBBBrush.h(brush))
+		If handle Return TBBSurface.s(handle)
 	End Method
 	
 End Type
@@ -608,10 +780,11 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	End Method
 
 	Method LoadTexture:TTexture(file$,flags=1)
-		Return New TBBTexture.init(bbLoadTexture(file,flags))
+		Return New TBBTexture.Init(bbLoadTexture(file,flags))
 	End Method
 	
 	Method CreateTexture:TTexture(width,height,flags=0,frames=1)
+		Return New TBBTexture.Init(bbCreateTexture(width,height,flags,frames))
 	End Method
 
 	Method CreateMesh:TEntity(parent:TEntity=Null)	
@@ -667,6 +840,10 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 		bbWireFrame enable
 	End Method
 
+	Method WBuffer(enable)
+		bbWBuffer enable
+	End Method
+
 	Method AmbientLight(r#,g#,b#)
 		bbAmbientLight r#,g#,b#
 	End Method
@@ -696,10 +873,9 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	End Method
 
 	Method UpdateWorld(anim_speed#=1.0) 
-		bbUpdateWorld
+		bbUpdateWorld anim_speed
 	End Method
-	
-	
+		
 	Method TFormPoint(x#,y#,z#,src_ent:TEntity,dest_ent:TEntity)
 		bbTFormPoint(x,y,z,TBBEntity.h(src_ent),TBBEntity.h(dest_ent))
 	End Method
@@ -727,35 +903,57 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	Method ProjectedX#()
 		Return bbProjectedX()		
 	End Method
+
 	Method ProjectedY#()
 		Return bbProjectedY()		
 	End Method
+
 	Method ProjectedZ#()
 		Return bbProjectedZ()		
 	End Method
 
-
 	Method LinePick:TEntity(x#,y#,z#,dx#,dy#,dz#,radius#)
+		Return TBBEntity.e(bbLinePick(x,y,z,dx,dy,dz,radius))
 	End Method
+
 	Method PickedX#()
+		Return bbPickedX()
 	End Method
+
 	Method PickedY#()
+		Return bbPickedX()
 	End Method
+
 	Method PickedZ#()
+		Return bbPickedX()
 	End Method
+
 	Method PickedNX#()
+		Return bbPickedX()
 	End Method
+
 	Method PickedNY#()
+		Return bbPickedX()
 	End Method
+
 	Method PickedNZ#()
+		Return bbPickedX()
 	End Method
+
 	Method PickedTime#()
+		Return bbPickedX()
 	End Method
+
 	Method PickedEntity:TEntity()
+		Return TBBEntity.e(bbPickedEntity())
 	End Method
+
 	Method PickedSurface:TSurface()
+		Return TBBSurface.s(bbPickedSurface())
 	End Method
+
 	Method PickedTriangle()
+		Return bbPickedTriangle()
 	End Method
 
 End Type

@@ -775,7 +775,7 @@ Type TMiniEntity Extends TEntity
 	' Calls function in TPick
 	Method EntityVisible(dest_entity:TEntity)
 	
-		Return TPick.EntityVisible(self,TMiniEntity(dest_entity))
+		Return TPick.EntityVisible(Self,TMiniEntity(dest_entity))
 	
 	End Method
 	

@@ -66,7 +66,6 @@ Type TEntity Extends TMatrix
 	Method EntityPick:TEntity(range#) Abstract
 '	Method LinePick:TEntity(x#,y#,z#,dx#,dy#,dz#,radius#=0.0) Abstract
 	
-	
 	Method DeltaYaw#(ent:TEntity) Abstract
 	Method DeltaPitch#(ent:TEntity) Abstract
 	
@@ -91,19 +90,16 @@ Type TEntity Extends TMatrix
 	Method CollisionSurface:TSurface(index) Abstract
 	Method CollisionTriangle(index) Abstract
 
-	Method MeshCullRadius(radius#) Abstract
-	Method EntityScaleX#(glob=False) Abstract
-	Method EntityScaleY#(glob=False) Abstract
-	Method EntityScaleZ#(glob=False) Abstract
-
 	Method GetEntityType() Abstract
 	Method GetEntityBrush:TBrush() Abstract
 	Method EntityOrder(order_no) Abstract
 	
 	Method CaptureEntity()
 	End Method
+	
 	Method EntityVisible(dest:TEntity)
 	End Method
+	
 	Method EntityDistance#(dest:TEntity)
 	End Method
 	
@@ -127,31 +123,29 @@ Type TEntity Extends TMatrix
 
 	Method CameraRange(near#,far#)
 	End Method
+	
 	Method CameraZoom(zoom#)
 	End Method
+	
 	Method CameraProjMode(mode)
 	End Method
+	
 	Method CameraFogMode(mode)
 	End Method
+	
 	Method CameraFogColor(red#,green#,blue#)
 	End Method
+	
 	Method CameraFogRange(near#,far#)
 	End Method
+	
 	Method CameraProject(x#,y#,z#)
 	End Method
-	Method ProjectedX#()
-	End Method
-	Method ProjectedY#()
-	End Method
-	Method ProjectedZ#()
-	End Method
-	Method EntityInView(entity:TEntity)
+		
+	Method EntityInView(dest:TEntity)
 	End Method
 
 	Method CameraPick:TEntity(x#,y#)
-	End Method
-
-	Method LightMesh(red#,green#,blue#,range#=0,x#=0,y#=0,z#=0)
 	End Method
 	
 	Method UpdateNormals()
@@ -170,6 +164,37 @@ Type TEntity Extends TMatrix
 	End Method
 
 	Method FindSurface:TSurface(brush:TBrush)
+	End Method
+
+	Method FlipMesh()
+	End Method
+	
+	Method AddMesh(src:TEntity)
+	End Method
+	
+	Method LightMesh(red#,green#,blue#,range#=0,x#=0,y#=0,z#=0)
+	End Method
+	
+	Method FitMesh(x#,y#,z#,width#,height#,depth#,uniform=0)
+	End Method
+	
+	Method ScaleMesh(x_scale#,y_scale#,z_scale#)
+	End Method
+	
+	Method RotateMesh(pitch#,yaw#,roll#)
+	End Method
+
+	Method PositionMesh(x#,y#,z#)
+	End Method
+	
+	Method MeshesIntersect(mesh_b:TEntity)
+	End Method
+
+	Method MeshWidth#()
+	End Method
+	Method MeshHeight#()
+	End Method
+	Method MeshDepth#()
 	End Method
 
 End Type

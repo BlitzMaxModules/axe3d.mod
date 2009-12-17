@@ -1,5 +1,6 @@
-Import "driver.bmx"
+Strict
 
+Import "driver.bmx"
 
 Rem
 bbdoc: <p> The <a href=#bbgraphics3d>bbGraphics3D</a> command resizes the graphics display to the specified size in pixels and with the specified display properties including color depth and fullscreen options.
@@ -1299,7 +1300,7 @@ an entity towards any arbitrary direction.
 See Also: <a href=#bbaligntovector>bbAlignToVector</a>
 EndRem
 Function PointEntity(entity:TEntity,target:TEntity,roll#=0)
-	Return entity.PointEntity(targer,roll)
+	Return entity.PointEntity(target,roll)
 End Function
 
 
@@ -2131,7 +2132,7 @@ more details on the effects of entity parenting.
 See Also: <a href=#bbscalemesh>bbScaleMesh</a> <a href=#bbcreatecube>bbCreateCube</a> <a href=#bbcreatecylinder>bbCreateCylinder</a> <a href=#bbcreatecone>bbCreateCone</a>
 EndRem
 Function CreateSphere:TEntity(segments=8,parent:TEntity=Null)
-	Return blitz3d_driver.CreateSphere(segmentsparent)
+	Return blitz3d_driver.CreateSphere(segments,parent)
 End Function
 
 Rem
@@ -2200,7 +2201,7 @@ more details on the effects of entity parenting.
 See Also: <a href=#bbcreatecube>bbCreateCube</a> <a href=#bbcreatesphere>bbCreateSphere</a> <a href=#bbcreatecylinder>bbCreateCylinder</a>
 EndRem
 Function CreateCone:TEntity(segments=8,solid=True,parent:TEntity=Null)
-	Return blitz3d_driver.CreateCone(segment,solid,parent)
+	Return blitz3d_driver.CreateCone(segments,solid,parent)
 End Function
 
 Rem
@@ -2679,7 +2680,7 @@ a graphic display's back buffer. To display 3D graphics on a texture, use
 after the call to <a href=#bbrenderworld>bbRenderWorld</a>
 </p>
 EndRem
-Function TextureBuffer:TBuffer(texture:TTexture,frame=0)
+Function TextureBuffer:TTextureLock(texture:TTexture,frame=0)
 	Return texture.TextureBuffer(frame)
 End Function
 
@@ -4146,7 +4147,8 @@ about:
 </p>
 See Also: <a href=#bbcreatemesh>bbCreateMesh</a>
 EndRem
-Function AddMesh(source_mesh:TEntity,dest_mesh:TEntity)
+Function AddMesh(source:TEntity,dest:TEntity)
+	dest.AddMesh source
 End Function
 
 Rem
@@ -4176,6 +4178,7 @@ sided instead.
 See Also: <a href=#bbloadermatrix>bbLoaderMatrix</a> <a href=#bbentityfx>bbEntityFX</a> <a href=#bbbrushfx>bbBrushFX</a>
 EndRem
 Function FlipMesh(mesh:TEntity)
+	mesh.FlipMesh
 End Function
 
 Rem
@@ -4269,6 +4272,7 @@ a value near 0 instead to &quot;flatten&quot; a mesh.
 See Also: <a href=#bbscalemesh>bbScaleMesh</a> <a href=#bbscaleentity>bbScaleEntity</a>
 EndRem
 Function FitMesh(mesh:TEntity,x#,y#,z#,width#,height#,depth#,uniform=0)
+	mesh.FitMesh x,y,z,width,height,depth,uniform
 End Function
 
 Rem
@@ -4284,6 +4288,7 @@ about:
 See Also: <a href=#bbfitmesh>bbFitMesh</a> <a href=#bbscaleentity>bbScaleEntity</a>
 EndRem
 Function ScaleMesh(mesh:TEntity,x_scale#,y_scale#,z_scale#)
+	mesh.ScaleMesh x_scale,y_scale,z_scale
 End Function
 
 Rem
@@ -4309,6 +4314,7 @@ and the axis of each rotation is as follows:
 See Also: <a href=#bbrotateentity>bbRotateEntity</a> <a href=#bbturnentity>bbTurnEntity</a>
 EndRem
 Function RotateMesh(mesh:TEntity,pitch#,yaw#,roll#)
+	mesh.RotateMesh pitch,yaw,roll 
 End Function
 
 Rem
@@ -4324,6 +4330,7 @@ about:
 See Also: <a href=#bbpositionentity>bbPositionEntity</a> <a href=#bbmoveentity>bbMoveEntity</a> <a href=#bbtranslateentity>bbTranslateEntity</a>
 EndRem
 Function PositionMesh(mesh:TEntity,x#,y#,z#)
+	mesh.PositionMesh x,y,z
 End Function
 
 Rem
@@ -4363,7 +4370,7 @@ routine available in Blitz3D.
 </p>
 EndRem
 Function MeshesIntersect(mesh_a:TEntity,mesh_b:TEntity)
-'	Return mesh_a.MeshesIntersct(mesh_b)
+	Return mesh_a.MeshesIntersect(mesh_b)
 End Function
 
 Rem
@@ -4380,7 +4387,7 @@ effect the result.
 See Also: <a href=#bbmeshheight>bbMeshHeight</a> <a href=#bbmeshdepth>bbMeshDepth</a>
 EndRem
 Function MeshWidth#(mesh:TEntity)
-'	Return mesh.MeshWidth()
+	Return mesh.MeshWidth()
 End Function
 
 Rem
@@ -4396,7 +4403,7 @@ Mesh operations, on the other hand, will effect the result.
 See Also: <a href=#bbmeshwidth>bbMeshWidth</a> <a href=#bbmeshdepth>bbMeshDepth</a>
 EndRem
 Function MeshHeight#(mesh:TEntity)
-'	Return mesh.MeshHeight()
+	Return mesh.MeshHeight()
 End Function
 
 Rem
@@ -4413,7 +4420,7 @@ the result.
 See Also: <a href=#bbmeshwidth>bbMeshWidth</a> <a href=#bbmeshheight>bbMeshHeight</a>
 EndRem
 Function MeshDepth#(mesh:TEntity)
-'	Return mesh.MeshDepth()
+	Return mesh.MeshDepth()
 End Function
 
 Rem
@@ -4521,7 +4528,8 @@ EndRem
 Function CreateSurface:TSurface(mesh:TEntity,brush:TBrush=Null)
 	Local surface:TSurface
 	surface=mesh.CreateSurface()
-	surface.PaintSurface(brush)
+	If brush surface.PaintSurface brush
+	Return surface
 End Function
 
 Rem
@@ -5038,7 +5046,7 @@ about:
 </p>
 EndRem
 Function TriangleVertex(surface:TSurface,triangle_index,corner)
-	Return surface.TriangleVertex(traingle_index,corner)
+	Return surface.TriangleVertex(triangle_index,corner)
 End Function
 
 Rem

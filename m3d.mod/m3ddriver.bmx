@@ -8,16 +8,46 @@ Import "m3dutil.bmx"
 
 blitz3d_driver = New TM3DDriver
 
+Type TM3DTextureLock Extends TTextureLock
+
+	Field _owner:TM3DTexture
+	Field _frame:Int 
+	Field _pixmap:TPixmap
+	
+	Method Init:TM3DTextureLock(owner:TM3DTexture,frame:Int)
+		_owner=owner
+		_frame=frame
+		Return Self
+	End Method
+	
+	Method Lock()
+		_pixmap=_owner._pixmap
+	End Method
+
+	Method Unlock()
+	End Method
+	
+	Method SetRGBA(x,y,rgba)
+		_pixmap.WritePixel x,y,rgba
+	End Method
+
+	Method GetRGBA(x,y)
+		Return _pixmap.ReadPixel(x,y)
+	End Method
+	
+End Type
+
 Type TM3DTexture Extends TTexture
 	Global _all:TMap=New TMap	
 	Field _handle
 	Field _pixmap:TPixmap
-	Field _buffer:TBuffer
+	Field _buffer:TM3DTextureLock
 
 	Method Init:TM3DTexture(handle)
 		Local key$=String(handle)
 		_handle=handle
 		MapInsert _all,key,Self
+		_buffer=New TM3DTextureLock.Init(Self,0)
 		Return Self
 	End Method
 
@@ -37,10 +67,6 @@ Type TM3DTexture Extends TTexture
 		'bbFreeTexture _handle
 	End Method
 	
-	Method TextureBuffer:TBuffer(frame)
-		Return _buffer
-	End Method
-
 	Method TextureBlend(blend_no)
 		'bbTextureBlend _handle,blend_no
 	End Method
@@ -80,7 +106,11 @@ Type TM3DTexture Extends TTexture
 	Method SetCubeMode(mode)
 		'bbSetCubeMode _handle,mode
 	End Method
-		
+
+	Method TextureBuffer:TTextureLock(frame)
+		Return _buffer
+	End Method
+			
 End Type
 
 Type TM3DSurface Extends TSurface

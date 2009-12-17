@@ -688,7 +688,10 @@ Type TMesh Extends TMiniEntity
 	
 	End Method
 	
-	Method AddMesh(mesh2:TMesh)
+	Method AddMesh(mesh:TEntity)
+		Local mesh2:TMesh
+
+		mesh2=TMesh(mesh)
 
 		'Local cs2=mesh2.CountSurfaces()
 	

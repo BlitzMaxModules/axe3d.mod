@@ -4,9 +4,9 @@
 
 Strict
 
-Import axe3d.m3d
+'Import axe3d.m3d
 
-'Import axe3d.b3dsdk
+Import axe3d.b3dsdk
 'Import axe3d.minib3d
 'Import sidesign.minib3d
 
@@ -33,6 +33,6 @@ While Not KeyHit(KEY_ESCAPE)
 	TurnEntity cube,1,2,3
 	UpdateWorld
 	RenderWorld
-	Flip
-'	bbFlip
+'	Flip
+	bbFlip
 Wend

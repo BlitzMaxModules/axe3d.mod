@@ -3,7 +3,12 @@ Strict
 Import brl.linkedlist
 Import brl.pixmap
 
-Import "graphicsbuffer.bmx"
+Type TTextureLock
+	Method Lock() Abstract
+	Method Unlock() Abstract
+	Method SetRGBA(x,y,rgba) Abstract
+	Method GetRGBA(x,y) Abstract
+End Type
 
 Type TTexture
 	Method FreeTexture() Abstract
@@ -17,5 +22,5 @@ Type TTexture
 	Method TextureName$() Abstract
 	Method SetCubeFace(face) Abstract
 	Method SetCubeMode(mode) Abstract
-	Method TextureBuffer:TBuffer(frame) Abstract
+	Method TextureBuffer:TTextureLock(frame=0) Abstract
 End Type

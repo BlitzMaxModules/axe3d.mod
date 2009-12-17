@@ -1,6 +1,36 @@
 ClearList TMiniTexture.tex_list
 
 
+Type TMiniTextureLock Extends TTextureLock
+
+	Field _owner:TMiniTexture
+	Field _frame:Int 
+	Field _pixmap:TPixmap
+	
+	Method Init:TMiniTextureLock(owner:TMIniTexture,frame:Int)
+		_owner=owner
+		_frame=frame
+		Return Self
+	End Method
+	
+	Method Lock()
+		_pixmap=_owner.pixmap
+	End Method
+
+	Method Unlock()
+	End Method
+	
+	Method SetRGBA(x,y,rgba)
+		_pixmap.WritePixel x,y,rgba
+	End Method
+
+	Method GetRGBA(x,y)
+		Return _pixmap.ReadPixel(x,y)
+	End Method
+	
+End Type
+
+
 Type TMiniTexture Extends TTexture
 
 	Global tex_list:TList=CreateList()
@@ -8,7 +38,7 @@ Type TMiniTexture Extends TTexture
 	Field file$,flags,blend=2,coords,u_scale#=1.0,v_scale#=1.0,u_pos#,v_pos#,angle#
 	Field file_abs$,width,height ' returned by Name/Width/Height commands
 	Field pixmap:TPixmap
-	Field buffer:TBuffer
+	Field buffer:TTextureLock
 	Field gltex[1]
 	Field cube_pixmap:TPixmap[7]
 	Field no_frames=1
@@ -31,8 +61,15 @@ Type TMiniTexture Extends TTexture
 	
 	End Method
 		
-	Method TextureBuffer:TBuffer(frame)
+	Method TextureBuffer:TTextureLock(frame)
 		Return buffer
+	End Method
+
+	Method LockTexture:TPixmap(buffer:TTextureLock)
+'		Return tex.pixmap
+	End Method
+	
+	Method UnlockTexture(buffer:TTextureLock)
 	End Method
 
 	Function CreateTexture:TTexture(width,height,flags=1,frames=1,tex:TMiniTexture=Null)
@@ -45,8 +82,7 @@ Type TMiniTexture Extends TTexture
 		EndIf
 		
 		tex.pixmap=CreatePixmap(width*frames,height,PF_RGBA8888)
-		tex.buffer=New TBuffer
-		tex.buffer.pixmap=tex.pixmap
+		tex.buffer=New TMiniTextureLock.Init(tex,0)
 
 		' ---
 		

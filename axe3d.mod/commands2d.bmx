@@ -1,4 +1,8 @@
-Import "graphicsbuffer.bmx"
+Strict
+
+Import "texture.bmx"
+
+Global ActiveTextureBuffer:TTextureLock
 
 Rem
 bbdoc: <p> The <a href=#bbtext>bbText</a> command prints the <b>string</b> specified at the pixel coordinate <b>x</b>,<b>y.</b> </p> <p> <a href=#bbtext>bbText</a> uses the current font which can be modified with the <a href=#bbsetfont>bbSetFont</a> command and the current color which can be modified with the <a href=#bbcolor>bbColor</a> command.
@@ -53,9 +57,9 @@ display's <a href=#bbbackbuffer>bbBackBuffer</a>.
 </p>
 See Also: <a href=#bbgraphicsbuffer>bbGraphicsBuffer</a> <a href=#bbfrontbuffer>bbFrontBuffer</a> <a href=#bbbackbuffer>bbBackBuffer</a> <a href=#bbimagebuffer>bbImageBuffer</a> <a href=#bbtexturebuffer>bbTextureBuffer</a>
 EndRem
-Function SetBuffer(buffer:TBuffer)
+Function SetBuffer(buffer:TTextureLock)
 	If buffer
-		TBuffer.Active=buffer
+		ActiveTextureBuffer=buffer
 	EndIf
 End Function
 
@@ -84,9 +88,9 @@ graphics buffer, see <a href=#bbsetbuffer>bbSetBuffer</a> for more details.
 </p>
 See Also: <a href=#bbwritepixel>bbWritePixel</a> <a href=#bbcopypixel>bbCopyPixel</a> <a href=#bbgetcolor>bbGetColor</a> <a href=#bbreadpixelfast>bbReadPixelFast</a>
 EndRem
-Function ReadPixel(x,y,buffer:TBuffer=Null)
-	If Not buffer buffer=TBuffer.Active
-	Return buffer.pixmap.ReadPixel(x,y)
+Function ReadPixel(x,y,buffer:TTextureLock=Null)
+	If Not buffer buffer=ActiveTextureBuffer
+	Return buffer.GetRGBA(x,y)
 End Function
 
 Rem
@@ -109,9 +113,9 @@ graphics buffer, see <a href=#bbsetbuffer>bbSetBuffer</a> for more details.
 </p>
 See Also: <a href=#bbreadpixel>bbReadPixel</a> <a href=#bbcopypixel>bbCopyPixel</a> <a href=#bbwritepixelfast>bbWritePixelFast</a> <a href=#bblockbuffer>bbLockBuffer</a>
 EndRem
-Function WritePixel(x,y,Color,buffer:TBuffer=Null)
-	If Not buffer buffer=TBuffer.Active
-	buffer.pixmap.WritePixel x,y,Color
+Function WritePixel(x,y,rgba,buffer:TTextureLock=Null)
+	If Not buffer buffer=ActiveTextureBuffer
+	buffer.SetRGBA x,y,rgba
 End Function
 
 Rem
@@ -132,9 +136,9 @@ writes to the the current graphics buffer.
 </p>
 See Also: <a href=#bbreadpixel>bbReadPixel</a> <a href=#bbwritepixel>bbWritePixel</a> <a href=#bbcopypixelfast>bbCopyPixelFast</a>
 EndRem
-Function CopyPixel(src_x,src_y,src_buffer:TBuffer,x,y,buffer:TBuffer=Null)
-	If Not buffer buffer=TBuffer.Active
-	buffer.pixmap.WritePixel x,y,src_buffer.pixmap.ReadPixel(src_x,src_y)
+Function CopyPixel(src_x,src_y,src_buffer:TTextureLock,x,y,buffer:TTextureLock=Null)
+	If Not buffer buffer=ActiveTextureBuffer
+	buffer.SetRGBA x,y,src_buffer.GetRGBA(src_x,src_y)
 End Function
 
 Rem
@@ -157,8 +161,8 @@ the current graphics buffer, see <a href=#bbsetbuffer>bbSetBuffer</a> for more d
 </p>
 See Also: <a href=#bbcopypixel>bbCopyPixel</a>
 EndRem
-Function CopyRect(src_x,src_y,width,height,dest_x,dest_y,src_buffer:TBuffer=Null,buffer:TBuffer=Null)'="bbCopyRect"
-	If Not buffer buffer=TBuffer.Active
+Function CopyRect(src_x,src_y,width,height,dest_x,dest_y,src_buffer:TTextureLock=Null,buffer:TTextureLock=Null)'="bbCopyRect"
+	If Not buffer buffer=ActiveTextureBuffer
 End Function
 
 Rem
@@ -186,8 +190,9 @@ information.
 </p>
 See Also: <a href=#bbunlockbuffer>bbUnlockBuffer</a> <a href=#bbreadpixelfast>bbReadPixelFast</a> <a href=#bbwritepixelfast>bbWritePixelFast</a> <a href=#bbcopypixelfast>bbCopyPixelFast</a>
 EndRem
-Function LockBuffer(buffer:TBuffer=Null)'="bbLockBuffer"
-	If Not buffer buffer=TBuffer.Active
+Function LockBuffer(buffer:TTextureLock=Null)'="bbLockBuffer"
+	If Not buffer buffer=ActiveTextureBuffer
+	buffer.Lock
 End Function
 
 Rem
@@ -202,8 +207,9 @@ See <a href=#bblockbuffer>bbLockBuffer</a> for more information.
 </p>
 See Also: <a href=#bblockbuffer>bbLockBuffer</a> <a href=#bbreadpixelfast>bbReadPixelFast</a> <a href=#bbwritepixelfast>bbWritePixelFast</a> <a href=#bbcopypixelfast>bbCopyPixelFast</a>
 EndRem
-Function UnlockBuffer(buffer:TBuffer=Null)'="bbUnlockBuffer"
-	If Not buffer buffer=TBuffer.Active
+Function UnlockBuffer(buffer:TTextureLock=Null)'="bbUnlockBuffer"
+	If Not buffer buffer=ActiveTextureBuffer
+	buffer.Unlock
 End Function
 
 Rem
@@ -222,9 +228,9 @@ area to avoid crashing the computer.
 </p>
 See Also: <a href=#bbreadpixel>bbReadPixel</a> <a href=#bblockbuffer>bbLockBuffer</a> <a href=#bbunlockbuffer>bbUnlockBuffer</a> <a href=#bbwritepixelfast>bbWritePixelFast</a>
 EndRem
-Function ReadPixelFast(x,y,buffer:TBuffer=Null)'="bbReadPixelFast"
-	If Not buffer buffer=TBuffer.Active
-	Return buffer.pixmap.ReadPixel(x,y)
+Function ReadPixelFast(x,y,buffer:TTextureLock=Null)'="bbReadPixelFast"
+	If Not buffer buffer=ActiveTextureBuffer
+	Return buffer.GetRGBA(x,y)
 End Function
 
 Rem
@@ -244,9 +250,9 @@ area to avoid crashing the computer.
 </p>
 See Also: <a href=#bbwritepixel>bbWritePixel</a> <a href=#bblockbuffer>bbLockBuffer</a> <a href=#bbunlockbuffer>bbUnlockBuffer</a> <a href=#bbreadpixelfast>bbReadPixelFast</a>
 EndRem
-Function WritePixelFast(x,y,c,buffer:TBuffer=Null)'="bbWritePixelFast"
-	If Not buffer buffer=TBuffer.Active
-	buffer.pixmap.WritePixel x,y,c
+Function WritePixelFast(x,y,c,buffer:TTextureLock=Null)'="bbWritePixelFast"
+	If Not buffer buffer=ActiveTextureBuffer
+	buffer.SetRGBA x,y,c
 End Function
 
 Rem
@@ -268,9 +274,9 @@ area to avoid crashing the computer.
 </p>
 See Also: <a href=#bbcopypixel>bbCopyPixel</a> <a href=#bbreadpixelfast>bbReadPixelFast</a> <a href=#bbwritepixelfast>bbWritePixelFast</a>
 EndRem
-Function CopyPixelFast(src_x,src_y,src_buffer:TBuffer,dest_x,dest_y,buffer:TBuffer=Null)'="bbCopyPixelFast"
-	If Not buffer buffer=TBuffer.Active
-	buffer.pixmap.WritePixel x,y,src_buffer.pixmap.ReadPixel(src_x,src_y)
+Function CopyPixelFast(src_x,src_y,src_buffer:TTextureLock,x,y,buffer:TTextureLock=Null)'="bbCopyPixelFast"
+	If Not buffer buffer=ActiveTextureBuffer
+	buffer.SetRGBA x,y,src_buffer.GetRGBA(src_x,src_y)
 End Function
 
 
@@ -1558,7 +1564,7 @@ about:
 </table>
 </p>
 EndRem
-Function LoadBuffer(buffer:TBuffer,filename$z)="bbLoadBuffer"
+Function LoadBuffer(buffer:TTextureLock,filename$z)="bbLoadBuffer"
 
 Rem
 bbdoc: <p> The <a href=#bbsavebuffer>bbSaveBuffer</a> function is similar to the <a href=#bbsaveimage>bbSaveImage</a> function in that it creates a .bmp image file with the specified <b>filename.</b> </p> <p> Unlike <a href=#bbsaveimage>bbSaveImage</a>, <a href=#bbsavebuffer>bbSaveBuffer</a> uses the pixels from the specified graphics buffer and so is useful for making screenshots.
@@ -1575,7 +1581,7 @@ by the system and other applications.
 </p>
 See Also: <a href=#bbsaveimage>bbSaveImage</a> <a href=#bbsetbuffer>bbSetBuffer</a>
 EndRem
-Function SaveBuffer(buffer:TBuffer,filename$z)="bbSaveBuffer"
+Function SaveBuffer(buffer:TTextureLock,filename$z)="bbSaveBuffer"
 
 Rem
 bbdoc: Mark a buffer as dirty

@@ -6,7 +6,7 @@ Type TSurface
 	Method GetSurfaceBrush:TBrush() Abstract
 	Method PaintSurface(brush:TBrush) Abstract
 	Method ClearSurface(clear_verts=True,clear_tris=True) Abstract
-	Method AddVertex(x#,y#,z#,u#=0.0,v#=0.0,w#=0.0) Abstract
+	Method AddVertex(x#,y#,z#,u#=0.0,v#=0.0,w#=1.0) Abstract
 	Method AddTriangle(v0,v1,v2) Abstract
 	Method CountVertices() Abstract
 	Method CountTriangles() Abstract

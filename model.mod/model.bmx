@@ -18,11 +18,41 @@ Import axe3d.axe3d
 
 blitz3d_driver = New TConcreteModelDriver
 
+
+Type TModelTextureLock Extends TTextureLock
+
+	Field _owner:TModelTexture
+	Field _frame:Int 
+	Field _pixmap:TPixmap
+	
+	Method Init:TModelTextureLock(owner:TModelTexture,frame:Int)
+		_owner=owner
+		_frame=frame
+		Return Self
+	End Method
+	
+	Method Lock()
+		_pixmap=_owner._pixmap
+	End Method
+
+	Method Unlock()
+		_pixmap=Null
+	End Method
+
+	Method SetRGBA(x,y,rgba)
+		_pixmap.WritePixel x,y,rgba
+	End Method
+
+	Method GetRGBA(x,y)
+		Return _pixmap.ReadPixel(x,y)
+	End Method
+End Type
+
 Type TModelTexture Extends TTexture
 	Global _all:TList=New TList	
 	Field _pixmap:TPixmap
 	Field _name$
-	Field _buffer:TBuffer
+	Field _buffer:TTextureLock
 	Field _blendmode
 	Field _fx
 	Field _uvlayer
@@ -38,6 +68,7 @@ Type TModelTexture Extends TTexture
 		_pixmap=pix
 		_scaleu=1
 		_scalev=1
+		_buffer=New TModelTextureLock.Init(Self,0)
 		ListAddLast _all,Self
 		Return Self
 	End Method
@@ -45,10 +76,6 @@ Type TModelTexture Extends TTexture
 	Method FreeTexture()
 	End Method
 	
-	Method TextureBuffer:TBuffer(frame)
-		Return _buffer
-	End Method
-
 	Method TextureBlend(blendmode)
 		_blendmode=blendmode
 	End Method
@@ -91,6 +118,16 @@ Type TModelTexture Extends TTexture
 		_cubemode=mode
 	End Method
 		
+	Method TextureBuffer:TTextureLock(frame)
+		Return _buffer
+	End Method
+
+	Method LockTexture:TPixmap(buffer:TTextureLock)
+		Return _pixmap
+	End Method
+	
+	Method UnlockTexture(buffer:TTextureLock)
+	End Method
 End Type
 
 Type TModelSurface Extends TSurface
