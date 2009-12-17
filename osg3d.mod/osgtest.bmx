@@ -17,4 +17,6 @@ graphicswindow_Win32()
 graphicswindow_X11()
 ?
 
+DebugLog osgGetVersion()
+
 osgmain()

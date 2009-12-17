@@ -16,7 +16,7 @@ ModuleInfo "CC_OPTS: -DOSG_LIBRARY_STATIC"
 ModuleInfo "CC_OPTS: -D_GLIBCXX_USE_WCHAR_T"
 ?
 
-Import "../osg.mod/include/*.h"
+Import "../../osg.mod/osg.mod/include/*.h"
 
 Import "../../pub.mod/freetype.mod/include/*.h"
 Import "../../axe.mod/jasper.mod/*.h"
@@ -24,12 +24,5 @@ Import "../../axe.mod/jasper.mod/*.h"
 Import "../../pub.mod/libpng.mod/*.h"
 Import "../../pub.mod/zlib.mod/*.h"
 
-Import osg.openthreads
-Import osg.osg
-Import osg.osgdb
-Import osg.osgfx
-Import osg.osgga
-Import osg.osgutil
-Import osg.osgviewer
-
 Import "osgtest.cpp"
+
