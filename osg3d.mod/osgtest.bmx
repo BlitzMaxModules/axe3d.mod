@@ -1,19 +1,16 @@
 Framework axe3d.osg3d
 
-'Import brl.standardio
 Import pub.opengl
-
-Import "-lgcc"
 
 Extern "C" 
 Function osgGetVersion$z()
 Function osgmain%()
+'Function __do_global_ctors_aux()
+Function graphicswindow_X11()
 End Extern
 
-
-'DebugLog "OSGVersion="+osgGetVersion()
-
-DebugStop
+?Linux
+graphicswindow_X11()
+?
 
 osgmain()
-

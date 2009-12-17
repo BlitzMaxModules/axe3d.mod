@@ -10,7 +10,6 @@
 Strict
 
 ModuleInfo "CC_OPTS: -fexceptions" 
-ModuleInfo "CC_OPTS: -s" 
 ModuleInfo "CC_OPTS: -DOT_LIBRARY_STATIC"
 ModuleInfo "CC_OPTS: -DOSG_LIBRARY_STATIC"
 ?Win32
@@ -45,37 +44,9 @@ Import "src/OpenThreads/pthreads/PThreadMutex.cpp"
 ?
 
 
-
-
-
-
-
-
-
 Import "src/osg/ArgumentParser.cpp"
 Import "src/osg/ApplicationUsage.cpp"
 Import "src/osg/Referenced.cpp"
-
-Import "src/osgViewer/CompositeViewer.cpp"
-?Linux
-Import "src/osgViewer/GraphicsWindowX11.cpp"
-Import "src/osgViewer/PixelBufferX11.cpp"
-?
-?Win32
-Import "src/osgViewer/GraphicsWindowWin32.cpp"
-Import "src/osgViewer/PixelBufferWin32.cpp"
-?
-Import "src/osgViewer/HelpHandler.cpp"
-Import "src/osgViewer/Renderer.cpp"
-Import "src/osgViewer/Scene.cpp"
-Import "src/osgViewer/ScreenCaptureHandler.cpp"
-Import "src/osgViewer/StatsHandler.cpp"
-Import "src/osgViewer/ViewerVersion.cpp"
-Import "src/osgViewer/ViewerView.cpp"
-Import "src/osgViewer/Viewer.cpp"
-Import "src/osgViewer/ViewerBase.cpp"
-Import "src/osgViewer/ViewerEventHandlers.cpp"
-
 
 
 ' OpenSourceGraph
@@ -258,26 +229,6 @@ Import "src/osgText/Text3D.cpp"
 Import "src/osgText/TextBase.cpp"
 Import "src/osgText/TextVersion.cpp"
 
-Import "src/osgWidget/Box.cpp"
-Import "src/osgWidget/Browser.cpp"
-Import "src/osgWidget/Canvas.cpp"
-Import "src/osgWidget/Frame.cpp"
-Import "src/osgWidget/Input.cpp"
-Import "src/osgWidget/Label.cpp"
-Import "src/osgWidget/Lua.cpp"
-Import "src/osgWidget/PdfReader.cpp"
-Import "src/osgWidget/Python.cpp"
-Import "src/osgWidget/StyleManager.cpp"
-Import "src/osgWidget/Table.cpp"
-Import "src/osgWidget/Util.cpp"
-Import "src/osgWidget/WidgetVersion.cpp"
-Import "src/osgWidget/ViewerEventHandlers.cpp"
-Import "src/osgWidget/VncClient.cpp"
-Import "src/osgWidget/Widget.cpp"
-Import "src/osgWidget/Window.cpp"
-Import "src/osgWidget/WindowManager.cpp"
-
-
 Import "src/osgUtil/CubeMapGenerator.cpp"
 Import "src/osgUtil/CullVisitor.cpp"
 Import "src/osgUtil/DelaunayTriangulator.cpp"
@@ -313,6 +264,46 @@ Import "src/osgUtil/TriStripVisitor.cpp"
 Import "src/osgUtil/UpdateVisitor.cpp"
 Import "src/osgUtil/UtilVersion.cpp"
 
+
+Import "src/osgViewer/CompositeViewer.cpp"
+?Linux
+Import "src/osgViewer/GraphicsWindowX11.cpp"
+Import "src/osgViewer/PixelBufferX11.cpp"
+?
+?Win32
+Import "src/osgViewer/GraphicsWindowWin32.cpp"
+Import "src/osgViewer/PixelBufferWin32.cpp"
+?
+Import "src/osgViewer/HelpHandler.cpp"
+Import "src/osgViewer/Renderer.cpp"
+Import "src/osgViewer/Scene.cpp"
+Import "src/osgViewer/ScreenCaptureHandler.cpp"
+Import "src/osgViewer/StatsHandler.cpp"
+Import "src/osgViewer/ViewerVersion.cpp"
+Import "src/osgViewer/ViewerView.cpp"
+Import "src/osgViewer/Viewer.cpp"
+Import "src/osgViewer/ViewerBase.cpp"
+Import "src/osgViewer/ViewerEventHandlers.cpp"
+
+
+Import "src/osgWidget/Box.cpp"
+Import "src/osgWidget/Browser.cpp"
+Import "src/osgWidget/Canvas.cpp"
+Import "src/osgWidget/Frame.cpp"
+Import "src/osgWidget/Input.cpp"
+Import "src/osgWidget/Label.cpp"
+Import "src/osgWidget/Lua.cpp"
+Import "src/osgWidget/PdfReader.cpp"
+Import "src/osgWidget/Python.cpp"
+Import "src/osgWidget/StyleManager.cpp"
+Import "src/osgWidget/Table.cpp"
+Import "src/osgWidget/Util.cpp"
+Import "src/osgWidget/WidgetVersion.cpp"
+Import "src/osgWidget/ViewerEventHandlers.cpp"
+Import "src/osgWidget/VncClient.cpp"
+Import "src/osgWidget/Widget.cpp"
+Import "src/osgWidget/Window.cpp"
+Import "src/osgWidget/WindowManager.cpp"
 
 
 Rem
@@ -452,8 +443,6 @@ Import "src/osgTerrain/Terrain.cpp"
 Import "src/osgTerrain/TerrainTechnique.cpp"
 Import "src/osgTerrain/TerrainTile.cpp"
 Import "src/osgTerrain/TerrainVersion.cpp"
-
-
 
 Import "src/osgIntrospection/ConstructorInfo.cpp"
 Import "src/osgIntrospection/CustomAttributeProvider.cpp"
