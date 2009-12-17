@@ -24,6 +24,12 @@ Import "../../axe.mod/jasper.mod/*.h"
 Import "../../pub.mod/libpng.mod/*.h"
 Import "../../pub.mod/zlib.mod/*.h"
 
-Import axe3d.osg
+Import osg.openthreads
+Import osg.osg
+Import osg.osgdb
+Import osg.osgfx
+Import osg.osgga
+Import osg.osgutil
+Import osg.osgviewer
 
 Import "osgtest.cpp"
