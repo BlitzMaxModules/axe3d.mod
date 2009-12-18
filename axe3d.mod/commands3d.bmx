@@ -88,7 +88,7 @@ tweening.
 See Also: <a href=#bbgraphics3d>bbGraphics3D</a> <a href=#bbcaptureworld>bbCaptureWorld</a> <a href=#bbcameraviewport>bbCameraViewport</a> <a href=#bbcameraprojmode>bbCameraProjMode</a> <a href=#bbtrisrendered>bbTrisRendered</a>
 EndRem
 Function RenderWorld(tween#=1.0)
-	Return blitz3d_driver.RenderWorld(tween)
+	blitz3d_driver.RenderWorld(tween)
 End Function
 
 Rem
@@ -111,7 +111,7 @@ movement and collisions work in Blitz3D.
 See Also: <a href=#bbanimate>bbAnimate</a> <a href=#bbcollisions>bbCollisions</a>
 EndRem
 Function UpdateWorld(anim_speed#=1.0)
-	Return blitz3d_driver.UpdateWorld(anim_speed)
+	blitz3d_driver.UpdateWorld(anim_speed)
 End Function
 
 Rem
@@ -144,7 +144,7 @@ based animation must be tweened manually.
 See Also: <a href=#bbrenderworld>bbRenderWorld</a> <a href=#bbcaptureentity>bbCaptureEntity</a>
 EndRem
 Function CaptureWorld()
-	Return blitz3d_driver.CaptureWorld()
+	blitz3d_driver.CaptureWorld()
 End Function
 
 Rem
@@ -172,7 +172,7 @@ textures.
 See Also: <a href=#bbfreeentity>bbFreeEntity</a> <a href=#bbfreebrush>bbFreeBrush</a> <a href=#bbfreetexture>bbFreeTexture</a>
 EndRem
 Function ClearWorld(entities=True,brushes=True,textures=True)
-	Return blitz3d_driver.ClearWorld(entities,brushes,textures)
+	blitz3d_driver.ClearWorld(entities,brushes,textures)
 End Function
 
 Rem
@@ -2483,7 +2483,7 @@ the texturebuffer.
 </p>
 See Also: <a href=#bbloadtexture>bbLoadTexture</a> <a href=#bbloadanimtexture>bbLoadAnimTexture</a>
 EndRem
-Function CreateTexture:TTexture(width,height,flags=0,frames=1)
+Function CreateTexture:TTexture(width,height,flags=1,frames=1)
 	Return blitz3d_driver.CreateTexture(width,height,flags,frames)
 End Function
 

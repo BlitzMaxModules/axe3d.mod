@@ -90,6 +90,7 @@ See Also: <a href=#bbwritepixel>bbWritePixel</a> <a href=#bbcopypixel>bbCopyPixe
 EndRem
 Function ReadPixel(x,y,buffer:TTextureLock=Null)
 	If Not buffer buffer=ActiveTextureBuffer
+	DebugStop
 	Return buffer.GetRGBA(x,y)
 End Function
 
@@ -115,6 +116,7 @@ See Also: <a href=#bbreadpixel>bbReadPixel</a> <a href=#bbcopypixel>bbCopyPixel<
 EndRem
 Function WritePixel(x,y,rgba,buffer:TTextureLock=Null)
 	If Not buffer buffer=ActiveTextureBuffer
+	DebugStop
 	buffer.SetRGBA x,y,rgba
 End Function
 
@@ -138,6 +140,7 @@ See Also: <a href=#bbreadpixel>bbReadPixel</a> <a href=#bbwritepixel>bbWritePixe
 EndRem
 Function CopyPixel(src_x,src_y,src_buffer:TTextureLock,x,y,buffer:TTextureLock=Null)
 	If Not buffer buffer=ActiveTextureBuffer
+	DebugStop	
 	buffer.SetRGBA x,y,src_buffer.GetRGBA(src_x,src_y)
 End Function
 
@@ -163,6 +166,7 @@ See Also: <a href=#bbcopypixel>bbCopyPixel</a>
 EndRem
 Function CopyRect(src_x,src_y,width,height,dest_x,dest_y,src_buffer:TTextureLock=Null,buffer:TTextureLock=Null)'="bbCopyRect"
 	If Not buffer buffer=ActiveTextureBuffer
+	DebugStop
 End Function
 
 Rem

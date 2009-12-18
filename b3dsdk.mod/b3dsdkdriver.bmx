@@ -13,27 +13,33 @@ Type TBBTextureLock Extends TTextureLock
 	Field _owner:TTexture
 	Field _frame:Int 
 	Field _buffer
+	Field _locked
 
 	Method Init:TBBTextureLock(owner:TBBTexture,frame)
 		_owner=owner
 		_frame=frame
 		_buffer=bbTextureBuffer(owner._handle,frame)
+		Assert _buffer
 		Return Self
 	End Method			
 	
 	Method Lock()
 		bbLockBuffer _buffer
+		_locked=True
 	End Method
 
 	Method Unlock()
 		bbUnlockBuffer _buffer
+		_locked=False
 	End Method
 	
 	Method SetRGBA(x,y,rgba)
+		Assert _locked
 		bbWritePixelFast x,y,rgba,_buffer
 	End Method
 
 	Method GetRGBA(x,y)
+		Assert _locked
 		Return bbReadPixelFast(x,y,_buffer)
 	End Method
 End Type
@@ -214,7 +220,7 @@ Type TBBSurface Extends TSurface
 	End Method
 
 	Method VertexNY#(v)
-		Return bbVertexNX(_handle,v)
+		Return bbVertexNY(_handle,v)
 	End Method
 
 	Method VertexNZ#(v)
@@ -276,9 +282,11 @@ Type TBBSurface Extends TSurface
 	Method MeshWidth#()
 		Return bbMeshWidth(_handle)
 	End Method
+	
 	Method MeshHeight#()
 		Return bbMeshHeight(_handle)
 	End Method
+	
 	Method MeshDepth#()
 		Return bbMeshDepth(_handle)
 	End Method
@@ -297,12 +305,15 @@ Type TBBEntityBrush Extends TBrush
 	End Method
 	
 	Method Copy:TBrush()
+		DebugStop
 	End Method
 
 	Method GetBrushTexture:TTexture(index=0)
 	End Method
 
 	Method FreeBrush()
+		bbFreeBrush _handle
+		_handle=0
 	End Method
 
 	Method BrushColor(r#,g#,b#)
@@ -356,6 +367,7 @@ Type TBBBrush Extends TBrush
 	End Function
 
 	Method Copy:TBrush()
+		DebugStop
 		Return b(bbCreateBrush(_handle))
 	End Method
 
@@ -365,6 +377,7 @@ Type TBBBrush Extends TBrush
 
 	Method FreeBrush()
 		bbFreeBrush _handle
+		_handle=0
 	End Method
 			
 	Method BrushColor(r#,g#,b#)
@@ -396,11 +409,13 @@ End Type
 Type TBBEntity Extends TEntity
 	Global _all:TMap=New TMap
 	Field _handle
+	Field _brush:TBBEntityBrush
 	
 	Method Init:TBBEntity(handle)
 		Local key$=String(handle)
 		_handle=handle
 		MapInsert _all,key,Self		
+		_brush=New TBBEntityBrush.Init(Self)
 		Return Self
 	End Method
 		
@@ -665,7 +680,7 @@ Type TBBEntity Extends TEntity
 	End Method
 
 	Method CollisionTriangle(index) 
-		Return bbCollisionX(_handle,index)
+		Return bbCollisionTriangle(_handle,index)
 	End Method
 
 	Method GetEntityType() 
@@ -673,7 +688,7 @@ Type TBBEntity Extends TEntity
 	End Method
 
 	Method GetEntityBrush:TBrush() 
-		Return TBBBrush.b(bbGetEntityBrush(_handle))
+		Return _brush
 	End Method
 
 	Method EntityOrder(order_no) 
@@ -783,7 +798,7 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 		Return New TBBTexture.Init(bbLoadTexture(file,flags))
 	End Method
 	
-	Method CreateTexture:TTexture(width,height,flags=0,frames=1)
+	Method CreateTexture:TTexture(width,height,flags=1,frames=1)
 		Return New TBBTexture.Init(bbCreateTexture(width,height,flags,frames))
 	End Method
 
@@ -804,7 +819,7 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	End Method
 
 	Method CreateCone:TEntity(segments=8,solid=True,parent:TEntity=Null)
-		Return New TBBEntity.init(bbCreateCone(segments,TBBEntity.h(parent)))
+		Return New TBBEntity.init(bbCreateCone(segments,solid,TBBEntity.h(parent)))
 	End Method
 	
 	Method CreatePlane:TEntity(divisions=1,parent:TEntity=Null)
@@ -921,27 +936,27 @@ Type TB3DSDKDriver Extends TBlitz3DDriver
 	End Method
 
 	Method PickedY#()
-		Return bbPickedX()
+		Return bbPickedY()
 	End Method
 
 	Method PickedZ#()
-		Return bbPickedX()
+		Return bbPickedZ()
 	End Method
 
 	Method PickedNX#()
-		Return bbPickedX()
+		Return bbPickedNX()
 	End Method
 
 	Method PickedNY#()
-		Return bbPickedX()
+		Return bbPickedNY()
 	End Method
 
 	Method PickedNZ#()
-		Return bbPickedX()
+		Return bbPickedNZ()
 	End Method
 
 	Method PickedTime#()
-		Return bbPickedX()
+		Return bbPickedTime()
 	End Method
 
 	Method PickedEntity:TEntity()
