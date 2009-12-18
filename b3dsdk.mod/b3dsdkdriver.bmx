@@ -243,10 +243,6 @@ Type TBBSurface Extends TSurface
 		Return bbTriangleVertex(_handle,tri_no,corner)
 	End Method
 
-	Method UpdateNormals()
-		bbUpdateNormals _handle
-	End Method
-
 	Method MeshCullBox(x#,y#,z#,w#,h#,d#)
 		bbMeshCullBox _handle,x,y,z,w,h,d
 	End Method
@@ -775,6 +771,10 @@ Type TBBEntity Extends TEntity
 		Local handle
 		handle=bbFindSurface(_handle,TBBBrush.h(brush))
 		If handle Return TBBSurface.s(handle)
+	End Method
+	
+	Method UpdateNormals()
+		bbUpdateNormals _handle
 	End Method
 	
 End Type

@@ -48,12 +48,14 @@ Type TModelTextureLock Extends TTextureLock
 	End Method
 End Type
 
+Const MAXTEXTUREDEPTH%=32
+
 Type TModelTexture Extends TTexture
 	Global _all:TList=New TList	
 	Field _pixmap:TPixmap
 	Field _flags
 	Field _name$
-	Field _buffer:TTextureLock
+	Field _buffer:TTextureLock[MAXTEXTUREDEPTH]
 	Field _blendmode
 	Field _fx
 	Field _uvlayer
@@ -70,7 +72,6 @@ Type TModelTexture Extends TTexture
 		_flags=flags
 		_scaleu=1
 		_scalev=1
-		_buffer=New TModelTextureLock.Init(Self,0)
 		ListAddLast _all,Self
 		Return Self
 	End Method
@@ -121,7 +122,10 @@ Type TModelTexture Extends TTexture
 	End Method
 		
 	Method TextureBuffer:TTextureLock(frame)
-		Return _buffer
+		If Not _buffer[frame]
+			_buffer[frame]=New TModelTextureLock.Init(Self,frame)
+		EndIf
+		Return _buffer[frame]
 	End Method
 
 	Method LockTexture:TPixmap(buffer:TTextureLock)
@@ -130,11 +134,13 @@ Type TModelTexture Extends TTexture
 	
 	Method UnlockTexture(buffer:TTextureLock)
 	End Method
+	
 End Type
 
 Type TModelSurface Extends TSurface
+	Const VSPAN%=3+3+4+3+3 ' x,y,z, nx,ny,nz, r,g,b,a, u0,v0,w0, u1,v1,w1..
 	Global _all:TList=New TList
-	Field _brush:TModelBrush=New TModelBrush
+	Field _brush:TModelBrush
 	Field _verts:Float[]
 	Field _tris:Int[]
 	Field _vertsize
@@ -162,13 +168,11 @@ Type TModelSurface Extends TSurface
 		Return _tricount
 	End Method
 
-	Const VSPAN%=3+3+4+3+3
-
 	Method lockvert:Float Ptr(v)
 		Local n
 		n=v*VSPAN
 		If n>=_verts.length
-			_verts=_verts[.._verts.length+n]
+			_verts=_verts[.._verts.length+n+VSPAN*32]
 		EndIf
 		Return Varptr _verts[n]
 	End Method
@@ -177,13 +181,11 @@ Type TModelSurface Extends TSurface
 		Local n
 		n=t*3
 		If n>=_tris.length
-			_tris=_tris[.._tris.length+n]
+			_tris=_tris[.._tris.length+n+32+6*32]
 		EndIf
 		Return Varptr _tris[t*3]
 	End Method
 	
-' x,y,z, nx,ny,nz, r,g,b,a, u0,v0,w0, u1,v1,w1..
-
 	Method AddVertex(x#,y#,z#,u#=0.0,v#=0.0,w#=0.0)
 		Local p:Float Ptr
 		p=lockvert(_vertcount)
@@ -295,7 +297,10 @@ Type TModelSurface Extends TSurface
 	End Method
 
 	Method UpdateNormals()
+		RestoreSurface
 	End Method
+
+	Method RestoreSurface() Abstract
 	
 End Type
 
@@ -304,7 +309,6 @@ Type TModelBrush Extends TBrush
 	Global _brushcount
 
 	Field _handle
-	Field _material
 	
 	Field _r#,_g#,_b#
 	Field _a#
@@ -396,6 +400,8 @@ Type TModelEntity Extends TEntity
 	Field _brush:TBrush
 	Field _parent:TModelEntity
 	Field _kids:TList=New TList
+	
+	Field _surfaces:TList=New TList
 			
 	Method Init:TModelEntity(class$,parent:TEntity)
 		_class=class
@@ -411,6 +417,10 @@ Type TModelEntity Extends TEntity
 		If e
 			e._kids.addlast Self
 		EndIf
+	End Method
+	
+	Method AddSurface(surface:TSurface)
+		ListAddLast _surfaces,surface
 	End Method
 	
 	Method GetParent:TEntity() 
@@ -521,6 +531,10 @@ Type TModelEntity Extends TEntity
 	End Method
 
 	Method PaintEntity(brush:TBrush) 
+		Local surface:TSurface
+		For surface=EachIn _surfaces
+			surface.PaintSurface(brush)
+		Next
 	End Method
 
 	Method ShowEntity() 
@@ -712,8 +726,49 @@ Type TModelDriver Extends TBlitz3DDriver
 		Return New TModelEntity.Init("mirror",parent)
 	End Method
 
-	Method CreateCube:TEntity(parent:TEntity=Null) 
-		Return New TModelEntity.Init("cube",parent)
+	Method CreateCube:TEntity(parent:TEntity=Null)
+		Local brush:TBrush
+		Local cube:TEntity
+		Local surf:TSurface
+		Local x#,y#,z#
+		
+		cube=CreateMesh(parent)
+		surf=cube.CreateSurface()
+		
+		x=1
+		y=1
+		z=1
+		'top
+		surf.AddVertex -x,y,-z 
+		surf.AddVertex x,y,-z 
+		surf.AddVertex x,y,z 
+		surf.AddVertex -x,y,z 
+		'bot
+		surf.AddVertex -x,-y,-z 
+		surf.AddVertex x,-y,-z 
+		surf.AddVertex x,-y,z 
+		surf.AddVertex -x,-y,z 
+		'top
+		surf.AddTriangle 0,3,2
+		surf.AddTriangle 0,2,1
+		'sides
+		surf.AddTriangle 3,0,7
+		surf.AddTriangle 0,4,7
+		surf.AddTriangle 2,3,7 
+		surf.AddTriangle 2,7,6
+		surf.AddTriangle 1,2,6
+		surf.AddTriangle 1,6,5
+		surf.AddTriangle 0,1,5
+		surf.AddTriangle 0,5,4
+		'bot
+		surf.AddTriangle 4,5,6
+		surf.AddTriangle 4,6,7
+		
+		cube.UpdateNormals
+				
+		Return cube
+		
+'		Return New TModelEntity.Init("cube",parent)
 	End Method
 
 	Method CreateLight:TEntity(light_type,parent:TEntity=Null) 

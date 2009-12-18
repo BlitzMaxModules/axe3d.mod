@@ -9,6 +9,89 @@ Import "m3dutil.bmx"
 
 blitz3d_driver = New TM3DDriver
 
+Rem
+
+Function m3dCreateTexture%(width%,height%,format%,flags%)="m3dCreateTexture"
+Function m3dSetTexturePath(texture%,path$z)="m3dSetTexturePath"
+Function m3dSetTextureData(texture%,data:Byte Ptr)="m3dSetTextureData"
+Function m3dCreate3dTexture%(width%,height%,depth%,format%,flags%)="m3dCreate3dTexture"
+Function m3dSet3dTextureData(texture%,data:Byte Ptr)="m3dSet3dTextureData"
+Function m3dCreateCubeTexture%(size%,format%,flags%)="m3dCreateCubeTexture"
+Function m3dSetCubeTextureData(texture%,data:Byte Ptr)="m3dSetCubeTextureData"
+
+EndRem
+
+Type TM3DTextureLock Extends TTextureLock
+
+	Field _owner:TM3DTexture
+	Field _frame:Int 
+	Field _pixmap:TPixmap
+	
+	Method Init:TM3DTextureLock(owner:TM3DTexture,frame:Int)
+		_owner=owner
+		_frame=frame
+		Return Self
+	End Method
+	
+	Method Lock()
+		_pixmap=_owner._pixmap
+	End Method
+
+	Method Unlock()
+	End Method
+	
+	Method SetRGBA(x,y,rgba)
+		_pixmap.WritePixel x,y,rgba
+	End Method
+
+	Method GetRGBA(x,y)
+		Return _pixmap.ReadPixel(x,y)
+	End Method
+	
+End Type
+
+Type TM3DTexture Extends TModelTexture
+	Global _map:TMap=New TMap	
+	Field _texture%
+
+	Method InitM3DTexture:TM3DTexture(pix:TPixmap,flags)
+		Local format%
+		format=m3dPixelFormat(pix)
+		_texture=m3dCreateTexture(pix.width,pix.height,format,0)
+		Local key$=String(_texture)
+		MapInsert _map,key,Self
+		Super.Init(pix,flags)
+		Return Self
+	End Method
+
+	Function mh(a:TTexture)
+		If TM3DTexture(a) Return TM3DTexture(a)._texture
+	End Function
+	
+	Function mt:TTexture(texture)
+		Local key$=String(texture)
+		If MapContains(_map,key)
+			Return TTexture(MapValueForKey(_map,key))
+		EndIf
+		Assert False	'skid
+	End Function
+
+	Method FreeTexture()
+		Assert _texture
+		m3dReleaseResource(_texture)
+		_texture=0
+	End Method
+	
+	Method TextureBuffer:TTextureLock(frame)
+		If Not _buffer[frame]
+			_buffer[frame]=New TM3DTextureLock.Init(Self,frame)
+		EndIf
+		Return _buffer[frame]
+	End Method
+			
+End Type
+
+
 Type TM3DBrush Extends TModelBrush
 	Global _map:TMap=New TMap	
 	Field _material
@@ -49,15 +132,15 @@ Type TM3DBrush Extends TModelBrush
 	
 	Function CreateBrush:TBrush(red#,green#,blue#)
 		Local mat
-		mat=m3dcreatematerial()
-		m3dSetMaterialColor mat,"DiffuseColor",red,green,blue		
-		Return New TM3dBrush.InitM3DBrush(mat)
+		mat=m3dCreateMaterial()
+		m3dSetMaterialColor mat,"DiffuseColor",red/255,green/255,blue/255		
+		Return New TM3DBrush.InitM3DBrush(mat)
 	End Function
 	
 	Function CloneBrush:TM3DBrush(brush:TM3DBrush)
 		Local mat
 		mat=m3dcreatematerial()
-		m3dSetMaterialColor mat,"DiffuseColor",brush._r,brush._g,brush._b		
+		m3dSetMaterialColor mat,"DiffuseColor",brush._r/255,brush._g/255,brush._b/255		
 		Return New TM3dBrush.InitM3DBrush(mat)
 	End Function
 
@@ -98,18 +181,35 @@ Type TM3DBrush Extends TModelBrush
 	
 End Type
 
+'Function m3dCreateSurface%(material%,model%)="m3dCreateSurface"
+'Function m3dSetSurfaceShader(surface%,shader%)="m3dSetSurfaceShader"
+'Function m3dSurfaceShader%(surface%)="m3dSurfaceShader"
+'Function m3dSetSurfaceMaterial(surface%,material%)="m3dSetSurfaceMaterial"
+'Function m3dSurfaceMaterial%(surface%)="m3dSurfaceMaterial"
+'Function m3dAddSurfaceVertex(surface%,x#,y#,z#,s0#,t0#)="m3dAddSurfaceVertex"
+'Function m3dAddSurfaceTriangle(surface%,vertex0%,vertex1%,vertex2%)="m3dAddSurfaceTriangle"
+
 Type TM3DSurface Extends TModelSurface
 	Global _map:TMap=New TMap
-	Field _surface
+	Field _surface%
 	Field _m3dbrush:TM3DBrush
+	Field _m3downer:TM3DEntity
 
-	Method InitM3DSurface:TM3DSurface(surface)
+	Method InitM3DSurface:TM3DSurface(owner:TM3DEntity)
+		Local surface%
+
+		_m3downer=owner
+		_m3dbrush=owner._m3dbrush
+
+		surface=m3dCreateSurface(_m3dbrush._handle,_m3downer._handle)
 		Local key$=String(surface)
-		_surface=surface
 		MapInsert _map,key,Self
+		_surface=surface
+
+		owner.AddSurface Self
 		Return Self
 	End Method
-
+	
 	Function h(a:TSurface)
 		If TM3DSurface(a) Return TM3DSurface(a)._surface
 	End Function
@@ -119,17 +219,35 @@ Type TM3DSurface Extends TModelSurface
 		If MapContains(_map,key)
 			Return TM3DSurface(MapValueForKey(_map,key))
 		EndIf
-		Return New TM3DSurface.InitM3DSurface(surface)
+		Assert 0
 	End Function
 
 	Method GetSurfaceBrush:TBrush()	
-		Return _brush
+		Return _m3dbrush
 	End Method
 	
 	Method PaintSurface(brush:TBrush)
-		_brush=TM3DBrush(brush)
-		DebugStop
-		'bbPaintSurface(_handle,_brush._handle)
+		_m3dbrush=TM3DBrush(brush)
+		m3dSetSurfaceMaterial _surface,_m3dbrush._material
+	End Method
+	
+	Method RestoreSurface()
+		Local i%
+		Local v:Float Ptr
+		Local t:Int Ptr
+		Local surface%
+		m3dClearSurface _surface
+		v=_verts
+		For i=0 Until _vertcount
+			m3dAddSurfaceVertex _surface,v[0],v[1],v[2],v[10],v[11]
+			v:+TModelSurface.VSPAN
+		Next
+		t=_tris
+		For i=0 Until _tricount
+			m3dAddSurfaceTriangle _surface,t[0],t[1],t[2]
+			t:+3
+		Next		
+		m3dSetSurfaceMaterial _surface,_m3dbrush._material
 	End Method
 	
 End Type
@@ -138,17 +256,16 @@ End Type
 Type TM3DEntity Extends TModelEntity
 	Global _map:TMap=New TMap
 	Field _handle
-	Field _class$
-	Field _name$
-	Field _brush:TM3DBrush
+	Field _m3dbrush:TM3DBrush
 	
 	Function CloneEntity:TM3DEntity(entity:TM3DEntity)
 	End Function
 	
-	Method InitM3D:TM3DEntity(handle,parent:TM3DEntity)
+	Method InitM3DEntity:TM3DEntity(handle,parent:TM3DEntity)
 		Local class$="m3dentity"
 		Local key$=String(handle)
 		_handle=handle
+		_m3dbrush=TM3DBrush(CreateBrush())
 		MapInsert _map,key,Self
 		Init(class,parent)
 		Return Self
@@ -172,6 +289,10 @@ Type TM3DEntity Extends TModelEntity
 
 	Method FreeEntity() 
 '		m3dFreeEntity _handle
+	End Method
+
+	Method CreateSurface:TSurface()
+		Return New TM3DSurface.InitM3DSurface(Self)
 	End Method
 
 	Method PositionEntity(x#,y#,z#,glob=False) 
@@ -203,6 +324,15 @@ Type TM3DEntity Extends TModelEntity
 	Method AlignToVector(vector_x#,vector_y#,vector_z#,axis,rate#=1.0)
 		'bbAlignToVector _handle,vector_x#,vector_y#,vector_z#,axis,rate#
 	End Method
+	
+	Method UpdateNormals()
+		Local surf:TM3DSurface
+		For surf=EachIn _surfaces
+			surf.RestoreSurface
+		Next
+		m3dUpdateModelNormals(_handle)
+		m3dUpdateModelTangents(_handle)
+	End Method
 		
 End Type
 
@@ -222,20 +352,31 @@ Type TM3DDriver Extends TModelDriver
 	End Method	
 
 	Method LoadTexture:TTexture(file$,flags=1)
+		Local pix:TPixmap
+		pix=LoadPixmap(file)
+		Return New TM3DTexture.Init(pix,flags)
 	End Method
 	
 	Method CreateTexture:TTexture(width,height,flags=0,frames=1)
+		Local pix:TPixmap
+		pix=CreatePixmap(width,height,PF_RGBA8888)
+		Return New TM3DTexture.Init(pix,flags)
 	End Method
 
 	Method CreateMesh:TEntity(parent:TEntity=Null) 
+		Local model
+		model=m3dCreateModel()
+		Return New TM3DEntity.InitM3DEntity(model,TM3DEntity(parent))
+	End Method	
+
+	Method CreateCube:TEntity(parent:TEntity=Null)
 		Local box
-		Local mat
-		
+		Local mat		
 		mat=m3dCreateMaterial()
 		m3dSetMaterialColor mat,"DiffuseColor",1,1,1		
-		box=m3dCreateBox(mat,1,1,1,0,0)
-		Return New TM3DEntity.InitM3D(box,TM3DEntity(parent))
-	End Method	
+		box=m3dCreateBox(mat,2,2,2,0,0)
+		Return New TM3DEntity.InitM3DEntity(box,TM3DEntity(parent))
+	End Method
 
 	Method CreatePivot:TEntity(parent:TEntity=Null) 
 	End Method
@@ -258,23 +399,13 @@ Type TM3DDriver Extends TModelDriver
 	Method CreateLight:TEntity(light_type,parent:TEntity=Null)
 		Local light
 		light=m3dCreatePointLight()
-		Return New TM3DEntity.InitM3D(light,TM3DEntity(parent))
-	End Method
-
-	Method CreateCube:TEntity(parent:TEntity=Null)
-		Local box
-		Local mat
-		
-		mat=m3dCreateMaterial()
-		m3dSetMaterialColor mat,"DiffuseColor",1,1,1		
-		box=m3dCreateBox(mat,1,1,1,0,0)
-		Return New TM3DEntity.InitM3D(box,TM3DEntity(parent))
+		Return New TM3DEntity.InitM3DEntity(light,TM3DEntity(parent))
 	End Method
 
 	Method CreateCamera:TEntity(parent:TEntity=Null)
 		Local cam
 		cam=m3dCreateCamera()
-		Return New TM3DEntity.InitM3D(cam,TM3DEntity(parent))
+		Return New TM3DEntity.InitM3DEntity(cam,TM3DEntity(parent))
 	End Method
 	
 	Method Graphics3D:TGraphics(w,h,d=0,m=0,r=60)
@@ -422,6 +553,7 @@ Function m3dSetSurfaceMaterial(surface%,material%)="m3dSetSurfaceMaterial"
 Function m3dSurfaceMaterial%(surface%)="m3dSurfaceMaterial"
 Function m3dAddSurfaceVertex(surface%,x#,y#,z#,s0#,t0#)="m3dAddSurfaceVertex"
 Function m3dAddSurfaceTriangle(surface%,vertex0%,vertex1%,vertex2%)="m3dAddSurfaceTriangle"
+
 Function m3dDestroyEntity(entity%)="m3dDestroyEntity"
 Function m3dCopyEntity%(entity%)="m3dCopyEntity"
 Function m3dShowEntity(entity%)="m3dShowEntity"
@@ -508,110 +640,6 @@ Function m3dRenderWorld()="m3dRenderWorld"
 
 
 
-Type TM3DTextureLock Extends TTextureLock
-
-	Field _owner:TM3DTexture
-	Field _frame:Int 
-	Field _pixmap:TPixmap
-	
-	Method Init:TM3DTextureLock(owner:TM3DTexture,frame:Int)
-		_owner=owner
-		_frame=frame
-		Return Self
-	End Method
-	
-	Method Lock()
-		_pixmap=_owner._pixmap
-	End Method
-
-	Method Unlock()
-	End Method
-	
-	Method SetRGBA(x,y,rgba)
-		_pixmap.WritePixel x,y,rgba
-	End Method
-
-	Method GetRGBA(x,y)
-		Return _pixmap.ReadPixel(x,y)
-	End Method
-	
-End Type
-
-Type TM3DTexture Extends TTexture
-	Global _all:TMap=New TMap	
-	Field _handle
-	Field _pixmap:TPixmap
-	Field _buffer:TM3DTextureLock
-
-	Method Init:TM3DTexture(handle)
-		Local key$=String(handle)
-		_handle=handle
-		MapInsert _all,key,Self
-		_buffer=New TM3DTextureLock.Init(Self,0)
-		Return Self
-	End Method
-
-	Function h(a:TTexture)
-		If TM3DTexture(a) Return TM3DTexture(a)._handle
-	End Function
-	
-	Function t:TTexture(handle)
-		Local key$=String(handle)
-		If MapContains(_all,key)
-			Return TTexture(MapValueForKey(_all,key))
-		EndIf
-		Return New TM3DTexture.Init(handle)
-	End Function
-
-	Method FreeTexture()
-		'bbFreeTexture _handle
-	End Method
-	
-	Method TextureBlend(blend_no)
-		'bbTextureBlend _handle,blend_no
-	End Method
-	
-	Method TextureCoords(coords_no)
-		'bbTextureCoords _handle,coords_no
-	End Method
-	
-	Method ScaleTexture(u#,v#)
-		'bbScaleTexture _handle,u,v
-	End Method
-	
-	Method PositionTexture(u#,v#)
-		'bbPositionTexture _handle,u,v
-	End Method
-
-	Method RotateTexture(angle#)
-		'bbRotateTexture _handle,angle
-	End Method
-
-	Method TextureWidth()
-		Return _pixmap.width
-	End Method
-
-	Method TextureHeight()
-		Return 'bbTextureHeight(_handle)
-	End Method
-
-	Method TextureName$()
-		Return 'bbTextureName(_handle)
-	End Method
-
-	Method SetCubeFace(face)
-		'bbSetCubeFace _handle,face
-	End Method
-
-	Method SetCubeMode(mode)
-		'bbSetCubeMode _handle,mode
-	End Method
-
-	Method TextureBuffer:TTextureLock(frame)
-		Return _buffer
-	End Method
-			
-End Type
 
 
 EndRem

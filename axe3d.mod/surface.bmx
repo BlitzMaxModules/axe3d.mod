@@ -28,6 +28,4 @@ Type TSurface
 	Method VertexV#(v,coord_set=0) Abstract
 	Method VertexW#(v,coord_set=0) Abstract
 	Method TriangleVertex(tri_no,corner) Abstract
-	Method UpdateNormals() Abstract
-	
 End Type

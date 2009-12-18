@@ -148,9 +148,6 @@ Type TEntity Extends TMatrix
 	Method CameraPick:TEntity(x#,y#)
 	End Method
 	
-	Method UpdateNormals()
-	End Method
-
 	Method MeshCullBox(x#,y#,z#,w#,h#,d#)
 	End Method
 	
@@ -172,6 +169,9 @@ Type TEntity Extends TMatrix
 	Method AddMesh(src:TEntity)
 	End Method
 	
+	Method UpdateNormals()
+	End Method
+
 	Method LightMesh(red#,green#,blue#,range#=0,x#=0,y#=0,z#=0)
 	End Method
 	
