@@ -51,6 +51,7 @@ End Type
 Type TModelTexture Extends TTexture
 	Global _all:TList=New TList	
 	Field _pixmap:TPixmap
+	Field _flags
 	Field _name$
 	Field _buffer:TTextureLock
 	Field _blendmode
@@ -64,8 +65,9 @@ Type TModelTexture Extends TTexture
 	Field _cubemode
 	Field _cubeface
 
-	Method Init:TModelTexture(pix:TPixmap)
+	Method Init:TModelTexture(pix:TPixmap,flags)
 		_pixmap=pix
+		_flags=flags
 		_scaleu=1
 		_scalev=1
 		_buffer=New TModelTextureLock.Init(Self,0)
@@ -190,6 +192,7 @@ Type TModelSurface Extends TSurface
 		p[2]=z
 		p[10]=u
 		p[11]=v		
+		p[12]=w		
 		_vertcount:+1
 	End Method
 	
@@ -248,19 +251,19 @@ Type TModelSurface Extends TSurface
 	End Method
 
 	Method VertexRed#(v)
-		Return _verts[v*VSPAN+7]
+		Return _verts[v*VSPAN+6]
 	End Method
 
 	Method VertexGreen#(v)
-		Return _verts[v*VSPAN+8]
+		Return _verts[v*VSPAN+7]
 	End Method
 
 	Method VertexBlue#(v)
-		Return _verts[v*VSPAN+9]
+		Return _verts[v*VSPAN+8]
 	End Method
 
 	Method VertexAlpha#(v)
-		Return _verts[v*VSPAN+10]
+		Return _verts[v*VSPAN+9]
 	End Method
 
 	Method VertexNX#(v)
@@ -268,23 +271,23 @@ Type TModelSurface Extends TSurface
 	End Method
 
 	Method VertexNY#(v)
-		Return _verts[v*VSPAN+6]
+		Return _verts[v*VSPAN+4]
 	End Method
 
 	Method VertexNZ#(v)
-		Return _verts[v*VSPAN+6]
+		Return _verts[v*VSPAN+5]
 	End Method
 
 	Method VertexU#(v,coord_set=0)
-		Return _verts[v*VSPAN+6]
+		Return _verts[v*VSPAN+3*coord_set+10]
 	End Method
 
 	Method VertexV#(v,coord_set=0)
-		Return _verts[v*VSPAN+6]
+		Return _verts[v*VSPAN+3*coord_set+11]
 	End Method
 
 	Method VertexW#(v,coord_set=0)
-		Return _verts[v*VSPAN+6]
+		Return _verts[v*VSPAN+3*coord_set+12]
 	End Method
 
 	Method TriangleVertex(tri,corner)
@@ -327,7 +330,7 @@ Type TModelBrush Extends TBrush
 		If texture_path
 			pix=LoadPixmap(texture_path)
 		EndIf
-		tex=New TModelTexture.Init(pix)
+		tex=New TModelTexture.Init(pix,flags)
 		tex.ScaleTexture u_scale,v_scale		
 		Return New TModelBrush.Init(tex)
 	End Function
@@ -651,7 +654,7 @@ Type TModelEntity Extends TEntity
 
 	Method CameraClsColor(r#,g#,b#)
 	End Method
-	
+		
 End Type
 
 
@@ -672,13 +675,13 @@ Type TModelDriver Extends TBlitz3DDriver
 	End Method	
 
 	Method LoadTexture:TTexture(file$,flags=1) 
-		Return New TModelTexture.Init(LoadPixmap(file))
+		Return New TModelTexture.Init(LoadPixmap(file),flags)
 	End Method
 	
 	Method CreateTexture:TTexture(width,height,flags=0,frames=1) 
 		Local pix:TPixmap
 		pix=CreatePixmap(width,height,PF_RGBA8888)
-		Return New TModelTexture.Init(pix)
+		Return New TModelTexture.Init(pix,flags)
 	End Method
 
 	Method CreateMesh:TEntity(parent:TEntity=Null)
@@ -725,6 +728,55 @@ Type TModelDriver Extends TBlitz3DDriver
 		_world.LightColor r,g,b
 	End Method
 
+	Method TFormPoint(x#,y#,z#,src:TEntity,dest:TEntity) 
+	End Method
+
+	Method TFormVector(x#,y#,z#,src:TEntity,dest:TEntity) 
+	End Method
+
+	Method TFormNormal(x#,y#,z#,src:TEntity,dest:TEntity) 
+	End Method
+
+	Method TFormedX#() 
+	End Method
+
+	Method TFormedY#() 
+	End Method
+
+	Method TFormedZ#() 
+	End Method
+
+	Method ProjectedX#() 
+	End Method
+
+	Method ProjectedY#() 
+	End Method
+
+	Method ProjectedZ#() 
+	End Method
+
+	Method LinePick:TEntity(x#,y#,z#,dx#,dy#,dz#,radius#) 
+	End Method
+	Method PickedX#() 
+	End Method
+	Method PickedY#() 
+	End Method
+	Method PickedZ#() 
+	End Method
+	Method PickedNX#() 
+	End Method
+	Method PickedNY#() 
+	End Method
+	Method PickedNZ#() 
+	End Method
+	Method PickedTime#() 
+	End Method
+	Method PickedEntity:TEntity() 
+	End Method
+	Method PickedSurface:TSurface() 
+	End Method
+	Method PickedTriangle() 
+	End Method
 End Type
 
 Type TConcreteModelDriver Extends TModelDriver
@@ -765,49 +817,5 @@ Type TConcreteModelDriver Extends TModelDriver
 	End Method
 	Method UpdateWorld(anim_speed#=1.0) 
 	End Method
-
-	Method TFormPoint(x#,y#,z#,src:TEntity,dest:TEntity) 
-	End Method
-	Method TFormVector(x#,y#,z#,src:TEntity,dest:TEntity) 
-	End Method
-	Method TFormNormal(x#,y#,z#,src:TEntity,dest:TEntity) 
-	End Method
-
-	Method TFormedX#() 
-	End Method
-	Method TFormedY#() 
-	End Method
-	Method TFormedZ#() 
-	End Method
-
-	Method ProjectedX#() 
-	End Method
-	Method ProjectedY#() 
-	End Method
-	Method ProjectedZ#() 
-	End Method
 	
-	Method LinePick:TEntity(x#,y#,z#,dx#,dy#,dz#,radius#) 
-	End Method
-
-	Method PickedX#() 
-	End Method
-	Method PickedY#() 
-	End Method
-	Method PickedZ#() 
-	End Method
-	Method PickedNX#() 
-	End Method
-	Method PickedNY#() 
-	End Method
-	Method PickedNZ#() 
-	End Method
-	Method PickedTime#() 
-	End Method
-	Method PickedEntity:TEntity() 
-	End Method
-	Method PickedSurface:TSurface() 
-	End Method
-	Method PickedTriangle() 
-	End Method
 End Type
