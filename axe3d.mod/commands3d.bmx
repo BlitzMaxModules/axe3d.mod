@@ -1177,7 +1177,7 @@ of view or optionally from the center of the world.
 See Also: <a href=#bbentityy>bbEntityY</a> <a href=#bbentityz>bbEntityZ</a>
 EndRem
 Function EntityX#(entity:TEntity,globalspace=0)
-	Return entity.EntityX()
+	Return entity.EntityX(globalspace)
 End Function
 
 Rem
@@ -1196,7 +1196,7 @@ of view or optionally from the center of the world.
 See Also: <a href=#bbentityx>bbEntityX</a> <a href=#bbentityz>bbEntityZ</a>
 EndRem
 Function EntityY#(entity:TEntity,globalspace=0)
-	Return entity.EntityY()
+	Return entity.EntityY(globalspace)
 End Function
 
 Rem
@@ -1215,7 +1215,7 @@ or optionally from the center of the world.
 See Also: <a href=#bbentityx>bbEntityX</a> <a href=#bbentityy>bbEntityY</a>
 EndRem
 Function EntityZ#(entity:TEntity,globalspace=0)
-	Return entity.EntityZ()
+	Return entity.EntityZ(globalspace)
 End Function
 
 
@@ -2253,6 +2253,7 @@ mirror's geometry.
 See Also: <a href=#bbcreateplane>bbCreatePlane</a>
 EndRem
 Function CreateMirror(parent:TEntity=Null)
+	DebugStop
 ''="bbCreateMirror"
 End Function
 
@@ -2282,7 +2283,7 @@ and will save on memory.
 See Also: <a href=#bbentityparent>bbEntityParent</a> <a href=#bbcopymesh>bbCopyMesh</a>
 EndRem
 Function CopyEntity(entity,parent:TEntity=Null)
-''="bbCopyEntity"
+	DebugStop
 End Function
 
 Rem
@@ -2356,7 +2357,7 @@ image source.
 See Also: <a href=#bbloadtexture>bbLoadTexture</a> <a href=#bbcreatetexture>bbCreateTexture</a> <a href=#bbtexturefilter>bbTextureFilter</a> <a href=#bbfreetexture>bbFreeTexture</a>
 EndRem
 Function LoadAnimTexture(file$,flags,frame_width,frame_height,first_frame,frame_count)
-''="bbLoadAnimTexture"
+	DebugStop
 End Function
 
 Rem

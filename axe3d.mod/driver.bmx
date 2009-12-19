@@ -9,7 +9,7 @@ Type TBlitz3DDriver
 	Method LoadBrush:TBrush(texture_path$,flags=1,u_scale#=1,v_scale#=1) Abstract	
 
 	Method LoadTexture:TTexture(file$,flags=1) Abstract
-	Method CreateTexture:TTexture(width,height,flags=0,frames=1) Abstract
+	Method CreateTexture:TTexture(width,height,flags=1,frames=1) Abstract
 
 	Method CreateMesh:TEntity(parent:TEntity=Null) Abstract	
 	

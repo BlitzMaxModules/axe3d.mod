@@ -48,13 +48,12 @@ End Type
 Type TBBTexture Extends TTexture
 	Global _all:TMap=New TMap	
 	Field _handle
-	Field _buffer:TBBTextureLock
+	Field _buffer:TBBTextureLock[8]
 
 	Method Init:TBBTexture(handle)
 		Local key$=String(handle)
 		_handle=handle
 		MapInsert _all,key,Self
-		_buffer=New TBBTextureLock.Init(Self,0)
 		Return Self
 	End Method
 
@@ -69,6 +68,13 @@ Type TBBTexture Extends TTexture
 		EndIf
 		Return New TBBTexture.Init(handle)
 	End Function
+
+	Method TextureBuffer:TTextureLock(frame)
+		If Not _buffer[frame]
+			_buffer[frame]=New TBBTextureLock.Init(Self,frame)
+		EndIf
+		Return _buffer[frame]
+	End Method
 
 	Method FreeTexture()
 		bbFreeTexture _handle
@@ -112,10 +118,6 @@ Type TBBTexture Extends TTexture
 
 	Method SetCubeMode(mode)
 		bbSetCubeMode _handle,mode
-	End Method
-
-	Method TextureBuffer:TTextureLock(frame)
-		Return _buffer
 	End Method
 			
 End Type
@@ -228,15 +230,15 @@ Type TBBSurface Extends TSurface
 	End Method
 
 	Method VertexU#(v,coord_set=0)
-		Return bbVertexU(_handle,v)
+		Return bbVertexU(_handle,v,coord_set)
 	End Method
 
 	Method VertexV#(v,coord_set=0)
-		Return bbVertexV(_handle,v)
+		Return bbVertexV(_handle,v,coord_set)
 	End Method
 
 	Method VertexW#(v,coord_set=0)
-		Return bbVertexW(_handle,v)
+		Return bbVertexW(_handle,v,coord_set)
 	End Method
 
 	Method TriangleVertex(tri_no,corner)
@@ -252,7 +254,7 @@ Type TBBSurface Extends TSurface
 	End Method
 	
 	Method AddMesh(src:TEntity)
-		bbAddMesh _handle,TBBEntity.h(src)
+		bbAddMesh TBBEntity.h(src),_handle
 	End Method
 	
 	Method LightMesh(red#,green#,blue#,range#=0,x#=0,y#=0,z#=0)
