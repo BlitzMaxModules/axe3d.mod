@@ -739,30 +739,49 @@ Type TModelDriver Extends TBlitz3DDriver
 		y=1
 		z=1
 		'top
-		surf.AddVertex -x,y,-z 
-		surf.AddVertex x,y,-z 
-		surf.AddVertex x,y,z 
-		surf.AddVertex -x,y,z 
+		surf.AddVertex -x,y,-z ,0,0
+		surf.AddVertex x,y,-z  ,1,0
+		surf.AddVertex x,y,z   ,1,1
+		surf.AddVertex -x,y,z  ,0,1
+		surf.AddTriangle 0,1,2
+		surf.AddTriangle 0,2,3
 		'bot
-		surf.AddVertex -x,-y,-z 
-		surf.AddVertex x,-y,-z 
-		surf.AddVertex x,-y,z 
-		surf.AddVertex -x,-y,z 
-		'top
-		surf.AddTriangle 0,3,2
-		surf.AddTriangle 0,2,1
-		'sides
-		surf.AddTriangle 3,0,7
-		surf.AddTriangle 0,4,7
-		surf.AddTriangle 2,3,7 
-		surf.AddTriangle 2,7,6
-		surf.AddTriangle 1,2,6
-		surf.AddTriangle 1,6,5
-		surf.AddTriangle 0,1,5
-		surf.AddTriangle 0,5,4
-		'bot
+		surf.AddVertex -x,-y,z ,0,0
+		surf.AddVertex x,-y,z  ,1,0
+		surf.AddVertex x,-y,-z   ,1,1
+		surf.AddVertex -x,-y,-z  ,0,1
 		surf.AddTriangle 4,5,6
 		surf.AddTriangle 4,6,7
+	
+		'front
+		surf.AddVertex -x,y,z ,0,0
+		surf.AddVertex x,y,z  ,1,0
+		surf.AddVertex x,-y,z   ,1,1
+		surf.AddVertex -x,-y,z  ,0,1
+		surf.AddTriangle 8,9,10
+		surf.AddTriangle 8,10,11
+		'back
+		surf.AddVertex -x,-y,-z ,1,1
+		surf.AddVertex x,-y,-z  ,0,1
+		surf.AddVertex x,y,-z   ,0,0
+		surf.AddVertex -x,y,-z  ,1,0
+		surf.AddTriangle 12,13,14
+		surf.AddTriangle 12,14,15
+	
+		'left
+		surf.AddVertex -x,y,-z  ,0,0
+		surf.AddVertex -x,y,z   ,1,0
+		surf.AddVertex -x,-y,z   ,1,1
+		surf.AddVertex -x,-y,-z  ,0,1
+		surf.AddTriangle 16,17,18
+		surf.AddTriangle 16,18,19
+		'back
+		surf.AddVertex x,y,z ,0,0
+		surf.AddVertex x,y,-z  ,1,0
+		surf.AddVertex x,-y,-z   ,1,1
+		surf.AddVertex x,-y,z  ,0,1
+		surf.AddTriangle 20,21,22
+		surf.AddTriangle 20,22,23
 		
 		cube.UpdateNormals
 				

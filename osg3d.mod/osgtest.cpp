@@ -35,10 +35,12 @@ extern "C" int osgmain();
 
 int osgmain(){
 	int argc;
-	char* argv[1];
+	char* argv[4];
 	
-	argc=1;
+	argc=3;
 	argv[0]="osg.mod";
+	argv[1]="--image";
+	argv[2]="c:\\test.png";
 
 	osg::ArgumentParser arguments(&argc,argv);
 	
@@ -100,7 +102,6 @@ int osgmain(){
 	// add the screen capture handler
 	viewer.addEventHandler(new osgViewer::ScreenCaptureHandler);
 
-	/*
 	// load the data
 	osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFiles(arguments);
 	if (!loadedModel) 
@@ -120,7 +121,6 @@ int osgmain(){
 	osgUtil::Optimizer optimizer;
 	optimizer.optimize(loadedModel.get());	
 	viewer.setSceneData( loadedModel.get() );
-*/
 	
 	viewer.realize();	
 	return viewer.run();

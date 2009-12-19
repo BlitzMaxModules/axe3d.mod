@@ -20,10 +20,13 @@ Global light:TEntity
 
 Graphics3D 800,600
 
-brush=CreateBrush(255,0,0)
+'brush=CreateBrush(255,0,0)
 
-cube=BuildCube()'CreateCube()
+brush=LoadBrush("logo.png",3)
+
+cube=CreateCube()
 ScaleEntity cube,1,1,1
+
 PaintEntity cube,brush
 
 cam=CreateCamera()
@@ -35,52 +38,9 @@ light=CreateLight()
 MoveEntity light,-25,25,-50
 
 While Not KeyHit(KEY_ESCAPE)
-	TurnEntity cube,1,2,3
+	TurnEntity cube,0,1,0
 	UpdateWorld
 	RenderWorld
 	Flip
 '	bbFlip
 Wend
-
-Function BuildCube:TEntity(parent:TEntity=Null)
-	Local brush:TBrush
-	Local cube:TEntity
-	Local surf:TSurface
-	Local x#,y#,z#
-	
-	cube=CreateMesh(parent)
-	surf=cube.CreateSurface()
-	
-	x=1
-	y=1
-	z=1
-	'top
-	surf.AddVertex -x,y,-z 
-	surf.AddVertex x,y,-z 
-	surf.AddVertex x,y,z 
-	surf.AddVertex -x,y,z 
-	'bot
-	surf.AddVertex -x,-y,-z 
-	surf.AddVertex x,-y,-z 
-	surf.AddVertex x,-y,z 
-	surf.AddVertex -x,-y,z 
-	'top
-	surf.AddTriangle 0,3,2
-	surf.AddTriangle 0,2,1
-	'sides
-	surf.AddTriangle 3,0,7
-	surf.AddTriangle 0,4,7
-	surf.AddTriangle 2,3,7 
-	surf.AddTriangle 2,7,6
-	surf.AddTriangle 1,2,6
-	surf.AddTriangle 1,6,5
-	surf.AddTriangle 0,1,5
-	surf.AddTriangle 0,5,4
-	'bot
-	surf.AddTriangle 4,5,6
-	surf.AddTriangle 4,6,7
-	
-	cube.UpdateNormals
-			
-	Return cube
-End Function

@@ -38,6 +38,7 @@ Type TM3DTextureLock Extends TTextureLock
 	End Method
 
 	Method Unlock()
+		 m3dSetTextureData _owner._texture,_pixmap.PixelPtr(0,0)
 	End Method
 	
 	Method SetRGBA(x,y,rgba)
@@ -51,13 +52,15 @@ Type TM3DTextureLock Extends TTextureLock
 End Type
 
 Type TM3DTexture Extends TModelTexture
+
 	Global _map:TMap=New TMap	
 	Field _texture%
 
 	Method InitM3DTexture:TM3DTexture(pix:TPixmap,flags)
 		Local format%
 		format=m3dPixelFormat(pix)
-		_texture=m3dCreateTexture(pix.width,pix.height,format,0)
+		_texture=m3dCreateTexture(pix.width,pix.height,format,TEXTURE_STATIC)
+		m3dSetTextureData _texture,pix.PixelPtr(0,0)
 		Local key$=String(_texture)
 		MapInsert _map,key,Self
 		Super.Init(pix,flags)
@@ -96,8 +99,11 @@ Type TM3DBrush Extends TModelBrush
 	Global _map:TMap=New TMap	
 	Field _material
 		
-	Method InitM3DBrush:TM3DBrush(material%,texture:TModelTexture=Null)
+	Method InitM3DBrush:TM3DBrush(material%,texture:TM3DTexture=Null)
 		_material=material
+		If texture
+			m3dSetMaterialTexture material,"DiffuseTexture",texture._texture
+		EndIf		
 		Local key$=String(_material)
 		MapInsert _map,key,Self
 		Super.Init(texture)
@@ -118,11 +124,11 @@ Type TM3DBrush Extends TModelBrush
 	
 	Function LoadBrush:TBrush(texture_path$,flags=1,u_scale#=1,v_scale#=1) 
 		Local pixmap:TPixmap
-		Local texture:TModelTexture
+		Local texture:TM3DTexture
 		If texture_path
 			pixmap=LoadPixmap(texture_path)
 		EndIf
-		texture=New TModelTexture.Init(pixmap,flags)
+		texture=New TM3DTexture.InitM3DTexture(pixmap,flags)
 		texture.ScaleTexture u_scale,v_scale		
 		Local material
 		material=m3dcreatematerial()
@@ -369,25 +375,7 @@ Type TM3DDriver Extends TModelDriver
 		Return New TM3DEntity.InitM3DEntity(model,TM3DEntity(parent))
 	End Method	
 
-	Method CreateCube:TEntity(parent:TEntity=Null)
-		Local box
-		Local mat		
-		mat=m3dCreateMaterial()
-		m3dSetMaterialColor mat,"DiffuseColor",1,1,1		
-		box=m3dCreateBox(mat,2,2,2,0,0)
-		Return New TM3DEntity.InitM3DEntity(box,TM3DEntity(parent))
-	End Method
-
 	Method CreatePivot:TEntity(parent:TEntity=Null) 
-	End Method
-
-	Method CreateSphere:TEntity(segments=8,parent:TEntity=Null) 
-	End Method	
-
-	Method CreateCylinder:TEntity(segments=8,solid=True,parent:TEntity=Null) 
-	End Method
-
-	Method CreateCone:TEntity(segments=8,solid=True,parent:TEntity=Null) 
 	End Method
 
 	Method CreatePlane:TEntity(divisions=1,parent:TEntity=Null) 
@@ -637,9 +625,5 @@ Function m3dSetAmbientColor(r#,g#,b#)="m3dSetAmbientColor"
 
 Function m3dUpdateWorld()="m3dUpdateWorld"
 Function m3dRenderWorld()="m3dRenderWorld"
-
-
-
-
 
 EndRem
