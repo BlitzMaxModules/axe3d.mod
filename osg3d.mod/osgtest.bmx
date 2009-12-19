@@ -4,9 +4,9 @@ Import pub.opengl
 
 Extern "C" 
 Function osgGetVersion$z()
-Function osgmain%()
+Function osgmain%(imagepath$z)
 End Extern
 
 DebugLog osgGetVersion()
 
-osgmain()
+osgmain("test.png")

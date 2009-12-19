@@ -33,14 +33,14 @@ extern "C" int osgmain();
 
 //using namespace osg;
 
-int osgmain(){
+int osgmain(char * imagepage){
 	int argc;
 	char* argv[4];
 	
 	argc=3;
 	argv[0]="osg.mod";
 	argv[1]="--image";
-	argv[2]="c:\\test.png";
+	argv[2]=imagepath;
 
 	osg::ArgumentParser arguments(&argc,argv);
 	
