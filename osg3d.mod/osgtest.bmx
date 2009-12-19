@@ -2,11 +2,10 @@ Import axe3d.osg3d
 
 Import pub.opengl
 
-Extern "C" 
-Function osgGetVersion$z()
-Function osgmain%(imagepath$z)
-End Extern
+Local args:Byte Ptr[3]
 
-DebugLog osgGetVersion()
+args[0]=AppTitle.ToCString()
+args[1]="--image".ToCString()
+args[2]="test.png".ToCString()
 
-osgmain("test.png")
+osgmain(3,args)

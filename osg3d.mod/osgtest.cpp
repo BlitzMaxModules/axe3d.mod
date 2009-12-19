@@ -29,18 +29,11 @@
 
 #include <iostream>
 
-extern "C" int osgmain();
+extern "C" int osgmain(int argc, char **argv);
 
 //using namespace osg;
 
-int osgmain(char * imagepage){
-	int argc;
-	char* argv[4];
-	
-	argc=3;
-	argv[0]="osg.mod";
-	argv[1]="--image";
-	argv[2]=imagepath;
+int osgmain(int argc, char **argv){
 
 	osg::ArgumentParser arguments(&argc,argv);
 	
