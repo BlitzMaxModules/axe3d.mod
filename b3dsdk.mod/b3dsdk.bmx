@@ -6,4 +6,6 @@ ModuleInfo "Version: 0.01"
 
 Strict
 
-Import "b3dsdkdriver.bmx"
+' this driver is dependent on installation of blitz3dsdk module and disabled by default
+
+'Import "b3dsdkdriver.bmx"

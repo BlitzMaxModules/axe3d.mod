@@ -31,13 +31,16 @@ Import osg.osgwidget
 Import osgplugins.png
 Import osgplugins.bmp
 Import osgplugins.tga
-
-'Import osgplugins.freetype
+Import osgplugins.jpeg
 
 Import osgplugins.autodesk3ds
 Import osgplugins.lwo
 Import osgplugins.lws
 Import osgplugins.vrml
+
+'Import osgplugins.dae
+
+Import osgplugins.osgfreetype
 
 Import osg.osgviewer
 
